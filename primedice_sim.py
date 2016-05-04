@@ -5,28 +5,93 @@ import copy
 from tkinter import *
 
 class Gui:
-    def __init__(self, default_account, default_config):
+    def __init__(self, simulation):
 
-        self.def_account = default_account
-        self.default_config = default_config
+        self.sim = simulation
         
         self.master = Tk()
         self.master.title("Primedice Simulator")
 
-        self.run_button = Button(self.master, text="Run",
-                                 command=self.run_simulator)
-        self.run_button.grid(row=0, column=0)
-
-        self.given_str = StringVar()
-        self.input_num = Entry(self.master,
-                               textvariable=self.given_str)
-        self.input_num.grid(row=1, column=0)
+        self.make_buttons()
 
         self.counter = 0
         self.master.mainloop()
 
     def run_simulator(self):
-        pass
+        self.update_settings()
+        self.sim.run()
+
+    def make_run_button(self):
+        self.run_button = Button(self.master, text="Run", command=self.run_simulator)
+        self.run_button.grid(row=5, column=0)
+
+    def make_balance_input(self):
+        self.balance_label = Label(self.master, text="Balance:")
+        self.balance_label.grid(row=0, column=0)
+
+        self.balance_str = StringVar()
+        self.balance_str.set(str(self.sim.account.get_balance()))
+
+        self.balance_input = Entry(self.master, textvariable=self.balance_str)
+        self.balance_input.grid(row=0, column=1)
+
+    def make_base_bet_input(self):
+        self.base_bet_label = Label(self.master, text="Base bet:")
+        self.base_bet_label.grid(row=1, column=0)
+
+        self.base_bet_str = StringVar()
+        self.base_bet_str.set(str(self.sim.config.get_base_bet()))
+
+        self.base_bet_input = Entry(self.master, textvariable=self.base_bet_str)
+        self.base_bet_input.grid(row=1, column=1)
+
+    def make_payout_input(self):
+        self.payout_label = Label(self.master, text="Payout:")
+        self.payout_label.grid(row=2, column=0)
+
+        self.payout_str = StringVar()
+        self.payout_str.set(str(self.sim.config.get_payout()))
+
+        self.payout_input = Entry(self.master, textvariable=self.payout_str)
+        self.payout_input.grid(row=2, column=1)
+
+    def make_iterations_input(self):
+        self.iterations_label = Label(self.master, text="Iterations:")
+        self.iterations_label.grid(row=3, column=0)
+
+        self.iterations_str = StringVar()
+        self.iterations_str.set(str(self.sim.config.get_iterations()))
+
+        self.iterations_input = Entry(self.master, textvariable=self.iterations_str)
+        self.iterations_input.grid(row=3, column=1)
+
+    def make_loss_adder_input(self):
+        self.loss_adder_label = Label(self.master, text="Loss Adder:")
+        self.loss_adder_label.grid(row=4, column=0)
+
+        self.loss_adder_str = StringVar()
+        self.loss_adder_str.set(str(self.sim.config.get_loss_adder()))
+
+        self.loss_adder_input = Entry(self.master, textvariable=self.loss_adder_str)
+        self.loss_adder_input.grid(row=4, column=1)
+
+    def make_buttons(self):
+        self.make_balance_input()
+
+        self.make_base_bet_input()
+        self.make_payout_input()
+        self.make_iterations_input()
+        self.make_loss_adder_input()
+
+        self.make_run_button()
+
+    def update_settings(self):
+        self.sim.account.set_balance(int(self.balance_str.get()))
+
+        self.sim.config.set_base_bet(int(self.base_bet_str.get()))
+        self.sim.config.set_payout(float(self.payout_str.get()))
+        self.sim.config.set_iterations(int(self.iterations_str.get()))
+        self.sim.config.set_loss_adder(int(self.loss_adder_str.get()))
 
 class Configuration:
     """Contain all of the configurations of the different options that the primedice
@@ -37,15 +102,15 @@ class Configuration:
         """ These are the different settings that can be given to the auto-better.
         All of the values should be given as they are on the primedice screen. 
         payout - float multiplier between 1.01202 and 9900
-        loss_adder - percent given as integer between 0 and 100.
+        loss_adder_percent - percent given as integer between 0 and 100.
         """
         self.base_bet = base_bet
-        
-        if not self.check_valid_payout(payout):
-                print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
-        
+  
         self.payout = payout 
-        self.loss_adder = loss_adder / 100 	# Turn the user-given percent into a decimal
+
+        self.loss_adder = loss_adder	# Turn the user-given percent into a decimal
+        self.loss_adder_percent = self.loss_adder / 100 
+
         self.win_chance = self.calc_win_chance(payout)
         self.roll_under_value = self.win_chance
         self.iterations = iterations
@@ -53,6 +118,8 @@ class Configuration:
     def calc_win_chance(self, payout):
         """Find the win chance that primedice will use with a given win payout."""
         
+        self.check_valid_payout(payout)
+
         # The equation used was found from taking data points from the primedice website 
         # and calculating the line of best fit. It is a power function, following the form
         # f(x) = kx^n where x is the win payout and f(x) is the win chance that primedice
@@ -79,17 +146,33 @@ class Configuration:
         
         if payout_minimum <= payout and payout <= payout_maximum:
             valid = True
+            print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
         else:
             valid = False
                 
         return valid
 
+    def set_base_bet(self, new_val):
+        self.base_bet = new_val
+
+    def set_payout(self, new_val):
+        self.payout = new_val
+
+    def set_iterations(self, new_val):
+        self.iterations = new_val
+
+    def set_loss_adder(self, new_val):
+        self.loss_adder = new_val  # Turn the user-given percent into a decimal
+        self.loss_adder_percent = self.loss_adder / 100 
     
     def get_base_bet(self):
         return self.base_bet
             
     def get_loss_adder(self):
         return self.loss_adder
+
+    def get_loss_adder_percent(self):
+        return self.loss_adder_percent
             
     def get_payout(self):
         return self.payout
@@ -105,18 +188,21 @@ class Account:
     
     def __init__(self, balance):
         self.balance = balance
-            
-    def add(self, amount):
+    
+    def set_balance(self, new_balance):
+        self.balance = new_balance
+
+    def add(self, new_val):
         """Add to the current account balance"""
 
-        self.balance += amount
+        self.balance += new_val
         
         return self.balance
             
-    def subtract(self, amount):
+    def subtract(self, new_val):
         """Subtract from the current account balance"""
         
-        self.balance -= amount
+        self.balance -= new_val
         
         return self.balance
             
@@ -156,7 +242,7 @@ class Simulation:
         return win
     
     def increase_bet(self):
-        self.current_bet += self.current_bet * self.config.get_loss_adder()
+        self.current_bet += self.current_bet * self.config.get_loss_adder_percent()
     
     def reset_bet(self):
         self.current_bet = self.config.get_base_bet()
@@ -199,8 +285,18 @@ class Simulation:
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
             print("[Progress] " + str(progress_percent) + "% complete")
+
+    def print_settings(self):
+        print("\n[MESSAGE] Running new simulation")
+        print("Balance:", self.account.get_balance(), "\n")
+        print("Base bet:", self.config.get_base_bet())
+        print("Payout:", self.config.get_payout())
+        print("Iterations:", self.config.get_iterations())
+        print("Loss adder:", self.config.get_loss_adder(), "\n")
             
     def run(self, progress_checks = 10):
+        self.print_settings()
+
         total_result = 0
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
@@ -217,15 +313,13 @@ class Simulation:
 class Expirement:
     """Run multiple simulations and show the data"""
     def __init__(self, config, account):
-        pass
-		
-		
+        pass	
 
 class Tests:
     """Contain test functions to make sure the code runs properly"""
     
     def __init__(self):
-        self.config = Configuration(base_bet=1, loss_adder=100, payout=2)
+        self.config = Configuration(base_bet=1, loss_adder_percent=100, payout=2)
         self.account = Account(balance=400)
         self.simulation = Simulation(self.config, self.account)
             
@@ -251,8 +345,7 @@ class Program:
         self.config = Configuration(base_bet=1, payout=2, loss_adder=100)
         self.account = Account(balance= 200)
         self.sim = Simulation(self.config, self.account)
-        
-        self.gui = Gui(self.account, self.sim)
+        self.gui = Gui(self.sim)
         
 def main():     
     """Call the expirement function"""
