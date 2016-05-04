@@ -6,33 +6,33 @@ from tkinter import *
 
 class Gui:
     def __init__(self, simulation):
-    	"""Display the inputs for the configuration values and their values"""
-    	
+        """Display the inputs for the configuration values and their values"""
+        
         self.sim = simulation
         
         self.master = Tk()
         self.master.title("Primedice Simulator")
 
-        self.make_inputs()	# Add all of the inputs, and their labels to the GUI
-        self.make_run_button()	# Add the run button to the GUI
+        self.make_inputs()  # Add all of the inputs, and their labels to the GUI
+        self.make_run_button()  # Add the run button to the GUI
         
         self.master.mainloop()
 
     def run_simulator(self):
-    	"""Call the simulator to run with the settings given in the input boxes"""
-    	
+        """Call the simulator to run with the settings given in the input boxes"""
+        
         self.update_settings()
         self.sim.run()
 
     def make_run_button(self):
-    	"""Construct a button that runs the simulation"""
-    	
+        """Construct a button that runs the simulation"""
+        
         self.run_button = Button(self.master, text="Run", command=self.run_simulator)
         self.run_button.grid(row=5, column=0)
 
     def make_balance_input(self):
-    	"""Construct an input field for the balance value"""
-    	
+        """Construct an input field for the balance value"""
+        
         self.balance_label = Label(self.master, text="Balance:")
         self.balance_label.grid(row=0, column=0)
 
@@ -43,8 +43,8 @@ class Gui:
         self.balance_input.grid(row=0, column=1)
 
     def make_base_bet_input(self):
-    	"""Construct an input field for the base bet value"""
-    	
+        """Construct an input field for the base bet value"""
+        
         self.base_bet_label = Label(self.master, text="Base bet:")
         self.base_bet_label.grid(row=1, column=0)
 
@@ -55,8 +55,8 @@ class Gui:
         self.base_bet_input.grid(row=1, column=1)
 
     def make_payout_input(self):
-    	"""Construct an input field for the payout value"""
-    	
+        """Construct an input field for the payout value"""
+        
         self.payout_label = Label(self.master, text="Payout:")
         self.payout_label.grid(row=2, column=0)
 
@@ -67,7 +67,7 @@ class Gui:
         self.payout_input.grid(row=2, column=1)
 
     def make_iterations_input(self):
-    	"""Construct an input field for the iterations value"""
+        """Construct an input field for the iterations value"""
         self.iterations_label = Label(self.master, text="Iterations:")
         self.iterations_label.grid(row=3, column=0)
 
@@ -78,7 +78,7 @@ class Gui:
         self.iterations_input.grid(row=3, column=1)
 
     def make_loss_adder_input(self):
-    	"""Construct an input field for the loss adder value"""
+        """Construct an input field for the loss adder value"""
         self.loss_adder_label = Label(self.master, text="Loss Adder:")
         self.loss_adder_label.grid(row=4, column=0)
 
@@ -89,7 +89,7 @@ class Gui:
         self.loss_adder_input.grid(row=4, column=1)
 
     def make_inputs(self):
-    	"""Call all of the functions to make the inputs"""
+        """Call all of the functions to make the inputs"""
         self.make_balance_input()
 
         self.make_base_bet_input()
@@ -98,9 +98,9 @@ class Gui:
         self.make_loss_adder_input()
 
     def update_settings(self):
-    	"""Pull all of the values from the input fields and use them
-    	to update the appropriate value"""
-    	
+        """Pull all of the values from the input fields and use them
+        to update the appropriate value"""
+        
         self.sim.account.set_balance(int(self.balance_str.get()))
 
         self.sim.config.set_base_bet(int(self.base_bet_str.get()))
@@ -112,7 +112,7 @@ class Configuration:
     """Contain all of the configurations of the different options that the primedice
     auto-better provides.
     """
-	
+    
     def __init__(self, base_bet, payout, iterations=100, loss_adder=0):
         """ These are the different settings that can be given to the auto-better.
         All of the values should be given as they are on the primedice screen. 
@@ -123,13 +123,13 @@ class Configuration:
   
         self.payout = payout 
 
-        self.loss_adder = loss_adder	# Turn the user-given percent into a decimal
+        self.loss_adder = loss_adder    # Turn the user-given percent into a decimal
         self.loss_adder_percent = self.loss_adder / 100 
 
         self.win_chance = self.calc_win_chance(payout)
         self.roll_under_value = self.win_chance
         self.iterations = iterations
-	
+    
     def calc_win_chance(self, payout):
         """Find the win chance that primedice will use with a given win payout."""
         
@@ -169,45 +169,45 @@ class Configuration:
         return valid
 
     def set_base_bet(self, new_val):
-    	"""Change the base_bet value to be the given input"""
+        """Change the base_bet value to be the given input"""
         self.base_bet = new_val
 
     def set_payout(self, new_val):
-    	"""Change the payout value to be the given input"""
+        """Change the payout value to be the given input"""
         self.payout = new_val
 
     def set_iterations(self, new_val):
-    	"""Change the iterations value to be the given input"""
+        """Change the iterations value to be the given input"""
         self.iterations = new_val
 
     def set_loss_adder(self, new_val):
-    	"""Change the loss adder value to be the given input, and update
-    	the loss adder percent value as well"""
+        """Change the loss adder value to be the given input, and update
+        the loss adder percent value as well"""
         self.loss_adder = new_val  # Turn the user-given percent into a decimal
         self.loss_adder_percent = self.loss_adder / 100 
     
     def get_base_bet(self):
-    	"""Return the current base bet"""
+        """Return the current base bet"""
         return self.base_bet
             
     def get_loss_adder(self):
-    	"""Return the current loss adder"""
+        """Return the current loss adder"""
         return self.loss_adder
 
     def get_loss_adder_percent(self):
-    	"""Return the curent loss adder as a percent"""
+        """Return the curent loss adder as a percent"""
         return self.loss_adder_percent
             
     def get_payout(self):
-    	"""Return the current payout"""
+        """Return the current payout"""
         return self.payout
 
     def get_iterations(self):
-    	"""Return the current iterations value"""
+        """Return the current iterations value"""
         return self.iterations
             
     def get_roll_under_value(self):
-    	"""Return the current roll under value"""
+        """Return the current roll under value"""
         return self.roll_under_value
 
 class Account:
@@ -217,7 +217,7 @@ class Account:
         self.balance = balance
     
     def set_balance(self, new_balance):
-    	"""Change the balance to be the given value"""
+        """Change the balance to be the given value"""
         self.balance = new_balance
 
     def add(self, new_val):
@@ -269,30 +269,30 @@ class Simulation:
         return win
     
     def increase_bet(self):
-    	"""Increase the current bet by the amount specified by the loss adder amount.""" 
+        """Increase the current bet by the amount specified by the loss adder amount.""" 
         self.current_bet += self.current_bet * self.config.get_loss_adder_percent()
     
     def reset_bet(self):
-    	"""Change the current best back to the bet value from the configuration."""
+        """Change the current best back to the bet value from the configuration."""
         self.current_bet = self.config.get_base_bet()
             
     def lose_roll(self, account):
-    	"""Simulate a lost roll"""
+        """Simulate a lost roll"""
         #print("Roll lost")
         self.increase_bet()
             
     def win_roll(self, account):
-    	"""Simulate a won roll"""
+        """Simulate a won roll"""
         reward = self.current_bet * self.config.get_payout()
         account.add(reward)
         #print("Roll won, +=", reward, "New bal:", account.get_balance())
         self.reset_bet()
                 
     def single_sim(self):
-    	"""Simulate a sinle round of betting until bankruptcy.
-    	Return the amount of rolls before then.
-    	"""
-    	
+        """Simulate a sinle round of betting until bankruptcy.
+        Return the amount of rolls before then.
+        """
+        
         rolls = 0
         self.reset_bet()
         sim_account = copy.copy(self.account)
@@ -307,28 +307,28 @@ class Simulation:
             #print("Balance: ", sim_account.get_balance())
             
             if self.roll():
-                    self.win_roll(sim_account)			
+                    self.win_roll(sim_account)  
             else:
                     self.lose_roll(sim_account)
             #print("================================")
         #print("\nTotal rolls:", rolls)
         #print("Final balance:", sim_account.get_balance())
         #print("Final bet:", self.current_bet)
-        return rolls	
+        return rolls    
     
     def print_progress(self, sim_num, iterations, progress_checks):
-    	"""Print the current progress of the simulation.
-    	progress_checks is just the amount of progress checks 
-    	that the user wants to be printed during each simulation.
-    	"""
-    	
+        """Print the current progress of the simulation.
+        progress_checks is just the amount of progress checks 
+        that the user wants to be printed during each simulation.
+        """
+        
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
             print("[Progress] " + str(progress_percent) + "% complete")
 
     def print_settings(self):
-    	"""Print the settings that are being accessed by the simulation"""
-    	
+        """Print the settings that are being accessed by the simulation"""
+        
         print("\n[MESSAGE] Running new simulation")
         print("Balance:", self.account.get_balance(), "\n")
         print("Base bet:", self.config.get_base_bet())
@@ -337,8 +337,8 @@ class Simulation:
         print("Loss adder:", self.config.get_loss_adder(), "\n")
             
     def run(self, progress_checks = 10):
-    	"""Run several simulations and return the average of them all"""
-    	
+        """Run several simulations and return the average of them all"""
+        
         self.print_settings()
         total_result = 0
         iterations = self.config.get_iterations()
@@ -357,7 +357,7 @@ class Expirement:
     """Run multiple simulations and show the data"""
     
     def __init__(self, config, account):
-        pass	
+        pass    
 
 class Tests:
     """Contain test functions to make sure the code runs properly"""
