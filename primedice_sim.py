@@ -269,22 +269,30 @@ class Simulation:
         return win
     
     def increase_bet(self):
+    	"""Increase the current bet by the amount specified by the loss adder amount.""" 
         self.current_bet += self.current_bet * self.config.get_loss_adder_percent()
     
     def reset_bet(self):
+    	"""Change the current best back to the bet value from the configuration."""
         self.current_bet = self.config.get_base_bet()
             
     def lose_roll(self, account):
+    	"""Simulate a lost roll"""
         #print("Roll lost")
         self.increase_bet()
             
     def win_roll(self, account):
+    	"""Simulate a won roll"""
         reward = self.current_bet * self.config.get_payout()
         account.add(reward)
         #print("Roll won, +=", reward, "New bal:", account.get_balance())
         self.reset_bet()
                 
     def single_sim(self):
+    	"""Simulate a sinle round of betting until bankruptcy.
+    	Return the amount of rolls before then.
+    	"""
+    	
         rolls = 0
         self.reset_bet()
         sim_account = copy.copy(self.account)
@@ -309,11 +317,17 @@ class Simulation:
         return rolls	
     
     def print_progress(self, sim_num, iterations, progress_checks):
+    	"""Print the current progress of the simulation.
+    	progress_checks is just the amount of progress checks 
+    	that the user wants to be printed during each simulation.
+    	"""
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
             print("[Progress] " + str(progress_percent) + "% complete")
 
     def print_settings(self):
+    	"""Print the settings that are being accessed by the simulation"""
+    	
         print("\n[MESSAGE] Running new simulation")
         print("Balance:", self.account.get_balance(), "\n")
         print("Base bet:", self.config.get_base_bet())
