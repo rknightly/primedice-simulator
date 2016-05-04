@@ -321,6 +321,7 @@ class Simulation:
     	progress_checks is just the amount of progress checks 
     	that the user wants to be printed during each simulation.
     	"""
+    	
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
             print("[Progress] " + str(progress_percent) + "% complete")
@@ -336,8 +337,9 @@ class Simulation:
         print("Loss adder:", self.config.get_loss_adder(), "\n")
             
     def run(self, progress_checks = 10):
+    	"""Run several simulations and return the average of them all"""
+    	
         self.print_settings()
-
         total_result = 0
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
@@ -353,6 +355,7 @@ class Simulation:
     
 class Expirement:
     """Run multiple simulations and show the data"""
+    
     def __init__(self, config, account):
         pass	
 
@@ -382,6 +385,8 @@ class Tests:
             print(self.simulation.roll())
         
 class Program:
+    """Contain all of the elements of the program"""
+    
     def __init__(self):
         self.config = Configuration(base_bet=1, payout=2, loss_adder=100)
         self.account = Account(balance= 200)
