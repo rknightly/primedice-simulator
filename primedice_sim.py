@@ -324,10 +324,10 @@ class Simulation:
         progress_checks is just the amount of progress checks 
         that the user wants to be printed during each simulation.
         """
-        
+        progress_ticks = 100 / progress_checks
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
-            self.progress_bar.increase_progress()
+            self.progress_bar.increase_progress(progress_ticks)
             #print("[Progress] " + str(progress_percent) + "% complete")
 
     def print_settings(self):
@@ -340,7 +340,7 @@ class Simulation:
         print("Iterations:", self.config.get_iterations())
         print("Loss adder:", self.config.get_loss_adder(), "\n")
             
-    def run(self, progress_bar, progress_checks = 100):
+    def run(self, progress_bar, progress_checks = 50):
         """Run several simulations and return the average of them all"""
         
         self.print_settings()
@@ -373,8 +373,8 @@ class SimulationProgressBar:
         self.progress_bar = Progressbar(length = 200)
         self.progress_bar.grid(row=7, column=1)
 
-    def increase_progress(self):
-        self.progress_bar.step()
+    def increase_progress(self, progress_ticks):
+        self.progress_bar.step(progress_ticks)
         self.master.update()
 
 class Expirement:
