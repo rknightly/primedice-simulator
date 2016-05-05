@@ -3,26 +3,29 @@ import random
 import time
 import copy
 from tkinter import *
+from tkinter.ttk import *
 
 class Gui:
     def __init__(self, simulation):
         """Display the inputs for the configuration values and their values"""
-        
+
         self.sim = simulation
-        
+
         self.master = Tk()
         self.master.title("Primedice Simulator")
 
         self.make_inputs()  # Add all of the inputs, and their labels to the GUI
         self.make_run_button()  # Add the run button to the GUI
-        
+
+        self.progress_bar = SimulationProgressBar(self.master)
+
         self.master.mainloop()
 
     def run_simulator(self):
         """Call the simulator to run with the settings given in the input boxes"""
         
         self.update_settings()
-        self.sim.run()
+        self.sim.run(self.progress_bar)
 
     def make_run_button(self):
         """Construct a button that runs the simulation"""
@@ -324,7 +327,8 @@ class Simulation:
         
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
-            print("[Progress] " + str(progress_percent) + "% complete")
+            self.progress_bar.increase_progress()
+            #print("[Progress] " + str(progress_percent) + "% complete")
 
     def print_settings(self):
         """Print the settings that are being accessed by the simulation"""
@@ -336,10 +340,11 @@ class Simulation:
         print("Iterations:", self.config.get_iterations())
         print("Loss adder:", self.config.get_loss_adder(), "\n")
             
-    def run(self, progress_checks = 10):
+    def run(self, progress_bar, progress_checks = 100):
         """Run several simulations and return the average of them all"""
         
         self.print_settings()
+        self.progress_bar = progress_bar
         total_result = 0
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
@@ -352,13 +357,32 @@ class Simulation:
         print("\n[Results] Average rolls until bankruptcy: " + str(sim_average))
         
         return sim_average
-    
+
+class SimulationProgressBar:
+    """A visual bar to show the progress of the simulation"""
+    def __init__(self, screen):
+        self.master = screen
+        self.progress = IntVar()
+
+        self.make_progress_bar()
+
+    def make_progress_bar(self):
+        self.balance_label = Label(self.master, text="Progress:")
+        self.balance_label.grid(row=7, column=0)
+
+        self.progress_bar = Progressbar(length = 200)
+        self.progress_bar.grid(row=7, column=1)
+
+    def increase_progress(self):
+        self.progress_bar.step()
+        self.master.update()
+
 class Expirement:
     """Run multiple simulations and show the data"""
     
     def __init__(self, config, account):
-        pass    
-
+        pass 
+	
 class Tests:
     """Contain test functions to make sure the code runs properly"""
     
