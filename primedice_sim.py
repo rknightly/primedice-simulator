@@ -176,8 +176,8 @@ class Configuration:
         
         if payout_minimum <= payout and payout <= payout_maximum:
             valid = True
-            print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
         else:
+            print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
             valid = False
                 
         return valid
