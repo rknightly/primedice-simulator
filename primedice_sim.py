@@ -350,7 +350,7 @@ class Simulation:
         print("Base bet:", self.config.get_base_bet())
         print("Payout:", self.config.get_payout())
         print("Iterations:", self.config.get_iterations())
-        print("Loss adder:", self.config.get_loss_adder(), "\n")
+        print("Loss adder:", self.config.get_loss_adder())
             
     def run(self, progress_bar, screen, progress_checks = 50):
         """Run several simulations and return the average of them all"""
@@ -369,7 +369,8 @@ class Simulation:
             #print("Sim result:", sim_result)
         sim_average = total_result / iterations
         
-        print("\n[Results] Average rolls until bankruptcy: " + str(sim_average))
+        print("[Results] Average rolls until bankruptcy: " + str(sim_average))
+        print("\n======================================================")
         
         return sim_average
 
