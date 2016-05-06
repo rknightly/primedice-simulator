@@ -16,8 +16,7 @@ class Gui:
 
         self.make_inputs()  # Add all of the inputs, and their labels to the GUI
         self.make_run_button()  # Add the run button to the GUI
-
-        self.progress_bar = SimulationProgressBar(self.master)
+        self.make_progress_bar()
 
         self.master.mainloop()
 
@@ -25,7 +24,11 @@ class Gui:
         """Call the simulator to run with the settings given in the input boxes"""
         
         self.update_settings()
-        self.sim.run(self.progress_bar)
+
+        # Pass in the progress bar and the master so that the simulator can update
+        # the progress bar and then refresh the screen when the progress checkpoints
+        # are hit
+        self.sim.run(self.progress_bar, self.master)    
 
     def make_run_button(self):
         """Construct a button that runs the simulation"""
@@ -90,6 +93,18 @@ class Gui:
 
         self.loss_adder_input = Entry(self.master, textvariable=self.loss_adder_str)
         self.loss_adder_input.grid(row=4, column=1)
+
+    def make_progress_bar(self):
+        """Make a bar to displays the progress of a task"""
+        self.balance_label = Label(self.master, text="Progress:")
+        self.balance_label.grid(row=7, column=0)
+
+        self.progress_bar = Progressbar(length = 200)
+        self.progress_bar.grid(row=7, column=1)
+
+    def increase_progress(self, progress_ticks):
+        self.progress_bar.step(progress_ticks)
+        self.master.update()
 
     def make_inputs(self):
         """Call all of the functions to make the inputs"""
@@ -319,7 +334,7 @@ class Simulation:
         #print("Final bet:", self.current_bet)
         return rolls    
     
-    def print_progress(self, sim_num, iterations, progress_checks):
+    def print_progress(self, sim_num, iterations, progress_checks, screen):
         """Print the current progress of the simulation.
         progress_checks is just the amount of progress checks 
         that the user wants to be printed during each simulation.
@@ -327,7 +342,8 @@ class Simulation:
         progress_ticks = 100 / progress_checks
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
-            self.progress_bar.increase_progress(progress_ticks)
+            self.progress_bar.step(progress_ticks)
+            screen.update()
             #print("[Progress] " + str(progress_percent) + "% complete")
 
     def print_settings(self):
@@ -340,15 +356,18 @@ class Simulation:
         print("Iterations:", self.config.get_iterations())
         print("Loss adder:", self.config.get_loss_adder(), "\n")
             
-    def run(self, progress_bar, progress_checks = 50):
+    def run(self, progress_bar, screen, progress_checks = 50):
         """Run several simulations and return the average of them all"""
         
+        # Takes the progress bar and the screen in order to update
+        # the progress bar and refresh the screen when necessary
+
         self.print_settings()
         self.progress_bar = progress_bar
         total_result = 0
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
-            self.print_progress(sim_num, iterations, progress_checks)
+            self.print_progress(sim_num, iterations, progress_checks, screen)
             sim_result = self.single_sim()
             total_result += sim_result
             #print("Sim result:", sim_result)
@@ -357,25 +376,6 @@ class Simulation:
         print("\n[Results] Average rolls until bankruptcy: " + str(sim_average))
         
         return sim_average
-
-class SimulationProgressBar:
-    """A visual bar to show the progress of the simulation"""
-    def __init__(self, screen):
-        self.master = screen
-        self.progress = IntVar()
-
-        self.make_progress_bar()
-
-    def make_progress_bar(self):
-        self.balance_label = Label(self.master, text="Progress:")
-        self.balance_label.grid(row=7, column=0)
-
-        self.progress_bar = Progressbar(length = 200)
-        self.progress_bar.grid(row=7, column=1)
-
-    def increase_progress(self, progress_ticks):
-        self.progress_bar.step(progress_ticks)
-        self.master.update()
 
 class Expirement:
     """Run multiple simulations and show the data"""
