@@ -102,10 +102,6 @@ class Gui:
         self.progress_bar = Progressbar(length = 200)
         self.progress_bar.grid(row=7, column=1)
 
-    def increase_progress(self, progress_ticks):
-        self.progress_bar.step(progress_ticks)
-        self.master.update()
-
     def make_inputs(self):
         """Call all of the functions to make the inputs"""
         self.make_balance_input()
