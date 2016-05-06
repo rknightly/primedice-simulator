@@ -426,4 +426,5 @@ def main():
     
     print("\nTime taken: --- %s seconds ---" % (time.time() - start_time))
 
-main()
+if __name__ == "__main__":
+    main()
