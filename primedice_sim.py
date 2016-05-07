@@ -5,6 +5,7 @@ import copy
 from tkinter import *
 from tkinter.ttk import *
 
+
 class Gui:
     def __init__(self, simulation):
         """Display the inputs for the configuration values and their values"""
@@ -14,9 +15,15 @@ class Gui:
         self.master = Tk()
         self.master.title("Primedice Simulator")
 
-        self.make_inputs()  # Add all of the inputs, and their labels to the GUI
-        self.make_run_button()  # Add the run button to the GUI
-        self.make_progress_bar()
+        self.balance_label, self.balance_input, self.balance_str, = self.make_balance_input()
+        self.base_bet_label, self.base_bet_input, self.base_bet_str = self.make_base_bet_input()
+        self.payout_label, self.payout_input, self.payout_str = self.make_payout_input()
+        self.iterations_label, self.iterations_input, self.iterations_str = self.make_iterations_input()
+        self.loss_adder_label, self.loss_adder_input, self.loss_adder_str = self.make_loss_adder_input()
+
+        self.run_button = self.make_run_button()
+
+        self.progress_label, self.progress_bar = self.make_progress_bar()
 
         self.master.mainloop()
 
@@ -28,88 +35,95 @@ class Gui:
         # Pass in the progress bar and the master so that the simulator can update
         # the progress bar and then refresh the screen when the progress checkpoints
         # are hit
+
         self.sim.run(self.progress_bar, self.master)    
 
     def make_run_button(self):
         """Construct a button that runs the simulation"""
         
-        self.run_button = Button(self.master, text="Run", command=self.run_simulator)
-        self.run_button.grid(row=5, column=0)
+        run_button = Button(self.master, text="Run", command=self.run_simulator)
+        run_button.grid(row=6, column=1)
+
+        return run_button
 
     def make_balance_input(self):
         """Construct an input field for the balance value"""
         
-        self.balance_label = Label(self.master, text="Balance:")
-        self.balance_label.grid(row=0, column=0)
+        balance_label = Label(self.master, text="Balance:")
+        balance_label.grid(row=0, column=0)
 
-        self.balance_str = StringVar()
-        self.balance_str.set(str(self.sim.account.get_balance()))
+        balance_str = StringVar()
+        balance_str.set(str(self.sim.account.get_balance()))
 
-        self.balance_input = Entry(self.master, textvariable=self.balance_str)
-        self.balance_input.grid(row=0, column=1)
+        balance_input = Entry(self.master, textvariable=balance_str)
+        balance_input.grid(row=0, column=1)
+
+        return balance_label, balance_input, balance_str
 
     def make_base_bet_input(self):
         """Construct an input field for the base bet value"""
         
-        self.base_bet_label = Label(self.master, text="Base bet:")
-        self.base_bet_label.grid(row=1, column=0)
+        base_bet_label = Label(self.master, text="Base bet:")
+        base_bet_label.grid(row=1, column=0)
 
-        self.base_bet_str = StringVar()
-        self.base_bet_str.set(str(self.sim.config.get_base_bet()))
+        base_bet_str = StringVar()
+        base_bet_str.set(str(self.sim.config.get_base_bet()))
 
-        self.base_bet_input = Entry(self.master, textvariable=self.base_bet_str)
-        self.base_bet_input.grid(row=1, column=1)
+        base_bet_input = Entry(self.master, textvariable=base_bet_str)
+        base_bet_input.grid(row=1, column=1)
+
+        return base_bet_label, base_bet_input, base_bet_str
 
     def make_payout_input(self):
         """Construct an input field for the payout value"""
         
-        self.payout_label = Label(self.master, text="Payout:")
-        self.payout_label.grid(row=2, column=0)
+        payout_label = Label(self.master, text="Payout:")
+        payout_label.grid(row=2, column=0)
 
-        self.payout_str = StringVar()
-        self.payout_str.set(str(self.sim.config.get_payout()))
+        payout_str = StringVar()
+        payout_str.set(str(self.sim.config.get_payout()))
 
-        self.payout_input = Entry(self.master, textvariable=self.payout_str)
-        self.payout_input.grid(row=2, column=1)
+        payout_input = Entry(self.master, textvariable=payout_str)
+        payout_input.grid(row=2, column=1)
+
+        return payout_label, payout_input, payout_str
 
     def make_iterations_input(self):
         """Construct an input field for the iterations value"""
-        self.iterations_label = Label(self.master, text="Iterations:")
-        self.iterations_label.grid(row=3, column=0)
+        iterations_label = Label(self.master, text="Iterations:")
+        iterations_label.grid(row=3, column=0)
 
-        self.iterations_str = StringVar()
-        self.iterations_str.set(str(self.sim.config.get_iterations()))
+        iterations_str = StringVar()
+        iterations_str.set(str(self.sim.config.get_iterations()))
 
-        self.iterations_input = Entry(self.master, textvariable=self.iterations_str)
-        self.iterations_input.grid(row=3, column=1)
+        iterations_input = Entry(self.master, textvariable=iterations_str)
+        iterations_input.grid(row=3, column=1)
+
+        return iterations_label, iterations_input, iterations_str
 
     def make_loss_adder_input(self):
         """Construct an input field for the loss adder value"""
-        self.loss_adder_label = Label(self.master, text="Loss Adder:")
-        self.loss_adder_label.grid(row=4, column=0)
 
-        self.loss_adder_str = StringVar()
-        self.loss_adder_str.set(str(self.sim.config.get_loss_adder()))
+        loss_adder_label = Label(self.master, text="Loss Adder:")
+        loss_adder_label.grid(row=4, column=0)
 
-        self.loss_adder_input = Entry(self.master, textvariable=self.loss_adder_str)
-        self.loss_adder_input.grid(row=4, column=1)
+        loss_adder_str = StringVar()
+        loss_adder_str.set(str(self.sim.config.get_loss_adder()))
+
+        loss_adder_input = Entry(self.master, textvariable=loss_adder_str)
+        loss_adder_input.grid(row=4, column=1)
+
+        return loss_adder_label, loss_adder_input, loss_adder_str
 
     def make_progress_bar(self):
         """Make a bar to displays the progress of a task"""
-        self.balance_label = Label(self.master, text="Progress:")
-        self.balance_label.grid(row=7, column=0)
+        progress_label = Label(self.master, text="Progress:")
+        progress_label.grid(row=7, column=0)
 
-        self.progress_bar = Progressbar(length = 200)
-        self.progress_bar.grid(row=7, column=1)
+        progress_bar = Progressbar(length = 200)
+        progress_bar.grid(row=7, column=1)
 
-    def make_inputs(self):
-        """Call all of the functions to make the inputs"""
-        self.make_balance_input()
-
-        self.make_base_bet_input()
-        self.make_payout_input()
-        self.make_iterations_input()
-        self.make_loss_adder_input()
+        return progress_label, progress_bar
 
     def update_settings(self):
         """Pull all of the values from the input fields and use them
@@ -174,7 +188,7 @@ class Configuration:
         payout_minimum = 1.01202
         payout_maximum = 9900
         
-        if payout_minimum <= payout and payout <= payout_maximum:
+        if payout_minimum <= payout <= payout_maximum:
             valid = True
         else:
             print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
@@ -292,14 +306,14 @@ class Simulation:
             
     def lose_roll(self, account):
         """Simulate a lost roll"""
-        #print("Roll lost")
+
         self.increase_bet()
             
     def win_roll(self, account):
         """Simulate a won roll"""
+
         reward = self.current_bet * self.config.get_payout()
         account.add(reward)
-        #print("Roll won, +=", reward, "New bal:", account.get_balance())
         self.reset_bet()
                 
     def single_sim(self):
@@ -310,24 +324,16 @@ class Simulation:
         rolls = 0
         self.reset_bet()
         sim_account = copy.copy(self.account)
-        
-        #print("Start Balance: ", sim_account.get_balance())
 
         while sim_account.get_balance() > self.current_bet:
             rolls += 1
             sim_account.subtract(self.current_bet)
             
-            #print("Current bet:", self.current_bet)
-            #print("Balance: ", sim_account.get_balance())
-            
             if self.roll():
                     self.win_roll(sim_account)  
             else:
                     self.lose_roll(sim_account)
-            #print("================================")
-        #print("\nTotal rolls:", rolls)
-        #print("Final balance:", sim_account.get_balance())
-        #print("Final bet:", self.current_bet)
+
         return rolls    
     
     def print_progress(self, sim_num, iterations, progress_checks, screen):
@@ -336,11 +342,24 @@ class Simulation:
         that the user wants to be printed during each simulation.
         """
         progress_ticks = 100 / progress_checks
+
         if sim_num % (iterations / progress_checks) == 0:
             progress_percent = int((sim_num / iterations) * 100)
             self.progress_bar.step(progress_ticks)
             screen.update()
-            #print("[Progress] " + str(progress_percent) + "% complete")
+
+    def verify_progress_checks(self, progress_checks, iterations):
+        """Check if the progress_checks value is greater than iterations, and fix it if so"""
+
+        # The number of progress checks must be less than the number of iterations in order
+        # For the progress bar to work properly.
+
+        if progress_checks > iterations:
+            # If this case does arise, just set the progress checks to be the same as the
+            # number of iterations, simplifying calculations
+            progress_checks = iterations
+
+        return progress_checks
 
     def print_settings(self):
         """Print the settings that are being accessed by the simulation"""
@@ -354,7 +373,9 @@ class Simulation:
             
     def run(self, progress_bar, screen, progress_checks = 50):
         """Run several simulations and return the average of them all"""
-        
+
+        progress_checks = self.verify_progress_checks(progress_checks, self.config.get_iterations())
+
         # Takes the progress bar and the screen in order to update
         # the progress bar and refresh the screen when necessary
 
@@ -378,32 +399,7 @@ class Expirement:
     """Run multiple simulations and show the data"""
     
     def __init__(self, config, account):
-        pass 
-	
-class Tests:
-    """Contain test functions to make sure the code runs properly"""
-    
-    def __init__(self):
-        self.config = Configuration(base_bet=1, loss_adder_percent=100, payout=2)
-        self.account = Account(balance=400)
-        self.simulation = Simulation(self.config, self.account)
-            
-    def run(self):
-        """Call whichever tests are currently meant to be run"""
-        #self.multiple_sims()
-    
-    def multiple_sims(self):
-        """Run multiple simulations and print the average result"""
-        self.simulation.run(50)
-            
-    def single_simulation(self):
-        """Run a single simulation and print the total rolls"""
-        print(self.simulation.single_sim())
-            
-    def roller(self):
-        """Run a series of rolls and print the results of those rolls"""
-        for _ in range(20):
-            print(self.simulation.roll())
+        pass
         
 class Program:
     """Contain all of the elements of the program"""
