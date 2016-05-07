@@ -416,7 +416,7 @@ class Program:
         self.account = Account(balance=200)
         self.sim = Simulation(self.config, self.account)
 
-        self.gui = None # Hold the gui as nothing until the program is called to run
+        self.gui = None     # Hold the gui as nothing until the program is called to run
 
     def run(self):
         """Create the gui, setting the program into motion"""
