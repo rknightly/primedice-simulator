@@ -226,7 +226,7 @@ class Configuration:
         return self.loss_adder
 
     def get_loss_adder_percent(self):
-        """Return the curent loss adder as a percent"""
+        """Return the current loss adder as a percent"""
         return self.loss_adder_percent
             
     def get_payout(self):
@@ -326,7 +326,7 @@ class Simulation:
         self.reset_bet()
                 
     def single_sim(self):
-        """Simulate a sinle round of betting until bankruptcy.
+        """Simulate a single round of betting until bankruptcy.
         Return the amount of rolls before then.
         """
         
