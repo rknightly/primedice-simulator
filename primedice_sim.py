@@ -120,7 +120,7 @@ class Gui:
         progress_label = Label(self.master, text="Progress:")
         progress_label.grid(row=7, column=0)
 
-        progress_bar = Progressbar(length = 200)
+        progress_bar = Progressbar(length=200)
         progress_bar.grid(row=7, column=1)
 
         return progress_label, progress_bar
@@ -135,6 +135,7 @@ class Gui:
         self.sim.config.set_payout(float(self.payout_str.get()))
         self.sim.config.set_iterations(int(self.iterations_str.get()))
         self.sim.config.set_loss_adder(int(self.loss_adder_str.get()))
+
 
 class Configuration:
     """Contain all of the configurations of the different options that the primedice
@@ -154,14 +155,14 @@ class Configuration:
         self.loss_adder = loss_adder    # Turn the user-given percent into a decimal
         self.loss_adder_percent = self.loss_adder / 100 
 
-        self.win_chance = self.calc_win_chance(payout)
+        self.win_chance = self.calc_win_chance()
         self.roll_under_value = self.win_chance
         self.iterations = iterations
     
-    def calc_win_chance(self, payout):
+    def calc_win_chance(self):
         """Find the win chance that primedice will use with a given win payout."""
-        
-        self.check_valid_payout(payout)
+
+        self.check_valid_payout()
 
         # The equation used was found from taking data points from the primedice website 
         # and calculating the line of best fit. It is a power function, following the form
@@ -171,29 +172,30 @@ class Configuration:
         # with a low win payout, the chance of winning is much higher.
         
         decimal_places = 2
-        win_chance = decimal.Decimal(98.998 * (payout ** -.99999))
+        win_chance = decimal.Decimal(98.998 * (self.payout ** -.99999))
         rounded_win_chance = round(win_chance, decimal_places)
         
         return rounded_win_chance
-    
-    def check_valid_payout(self, payout):
+
+    def check_valid_payout(self):
         """Ensure that the given payout is allowed by the site.
-        If it is not, print a [WARNING] message and continue."""
-        
+        If it is not, print a [WARNING] message and continue.
+        """
+
         # Primedice enforces a minimum and maximum value for the payout to avoid the
         # Situation of having an absurdly high payout or win chance. The minimum and
         # maximum allowed values are given by the primedice website when an invalid
         # value is entered
-        
+
         payout_minimum = 1.01202
         payout_maximum = 9900
-        
-        if payout_minimum <= payout <= payout_maximum:
+
+        if payout_minimum <= self.payout <= payout_maximum:
             valid = True
         else:
             print("[WARNING] Payout value entered was not within the range allowed by PrimeDice")
             valid = False
-                
+
         return valid
 
     def set_base_bet(self, new_val):
@@ -215,7 +217,8 @@ class Configuration:
         self.loss_adder_percent = self.loss_adder / 100 
     
     def get_base_bet(self):
-        """Return the current base bet"""
+        """Return the current base bet
+        """
         return self.base_bet
             
     def get_loss_adder(self):
@@ -237,6 +240,7 @@ class Configuration:
     def get_roll_under_value(self):
         """Return the current roll under value"""
         return self.roll_under_value
+
 
 class Account:
     """Contain the user's primedice account stats"""
@@ -265,6 +269,7 @@ class Account:
         
         return self.balance
 
+
 class Results:
     """Contain the results of a simulation"""
     
@@ -273,7 +278,8 @@ class Results:
         self.final_balance = final_balance
             
     def get_results(self):
-            return rolls_until_bankrupt, final_balance
+            return self.rolls_until_bankrupt, self.final_balance
+
 
 class Simulation:
     """Contain the simulation function and store the data of each simulation"""
@@ -281,8 +287,11 @@ class Simulation:
     def __init__(self, config, account):
         self.config = config
         self.account = account
+
+        self.current_bet = config.get_base_bet()
             
     def roll(self):
+
         """Simulate one 'dice roll' and return True if the roll was won by the
         user or False if the roll was lost"""
         
@@ -304,7 +313,7 @@ class Simulation:
         """Change the current best back to the bet value from the configuration."""
         self.current_bet = self.config.get_base_bet()
             
-    def lose_roll(self, account):
+    def lose_roll(self):
         """Simulate a lost roll"""
 
         self.increase_bet()
@@ -332,32 +341,31 @@ class Simulation:
             if self.roll():
                     self.win_roll(sim_account)  
             else:
-                    self.lose_roll(sim_account)
+                    self.lose_roll()
 
         return rolls    
     
-    def print_progress(self, sim_num, iterations, progress_checks, screen):
+    def print_progress(self, sim_num, progress_checks, screen, progress_bar):
         """Print the current progress of the simulation.
         progress_checks is just the amount of progress checks 
         that the user wants to be printed during each simulation.
         """
         progress_ticks = 100 / progress_checks
 
-        if sim_num % (iterations / progress_checks) == 0:
-            progress_percent = int((sim_num / iterations) * 100)
-            self.progress_bar.step(progress_ticks)
+        if sim_num % (self.config.get_iterations() / progress_checks) == 0:
+            progress_bar.step(progress_ticks)
             screen.update()
 
-    def verify_progress_checks(self, progress_checks, iterations):
+    def verify_progress_checks(self, progress_checks):
         """Check if the progress_checks value is greater than iterations, and fix it if so"""
 
         # The number of progress checks must be less than the number of iterations in order
         # For the progress bar to work properly.
 
-        if progress_checks > iterations:
+        if progress_checks > self.config.get_iterations():
             # If this case does arise, just set the progress checks to be the same as the
             # number of iterations, simplifying calculations
-            progress_checks = iterations
+            progress_checks = self.config.get_iterations()
 
         return progress_checks
 
@@ -371,23 +379,21 @@ class Simulation:
         print("Iterations:", self.config.get_iterations())
         print("Loss adder:", self.config.get_loss_adder())
             
-    def run(self, progress_bar, screen, progress_checks = 50):
+    def run(self, progress_bar, screen, progress_checks=50):
         """Run several simulations and return the average of them all"""
 
-        progress_checks = self.verify_progress_checks(progress_checks, self.config.get_iterations())
+        progress_checks = self.verify_progress_checks(progress_checks)
 
         # Takes the progress bar and the screen in order to update
         # the progress bar and refresh the screen when necessary
 
         self.print_settings()
-        self.progress_bar = progress_bar
         total_result = 0
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
-            self.print_progress(sim_num, iterations, progress_checks, screen)
+            self.print_progress(sim_num, progress_checks, screen, progress_bar)
             sim_result = self.single_sim()
             total_result += sim_result
-            #print("Sim result:", sim_result)
         sim_average = total_result / iterations
         
         print("[Results] Average rolls until bankruptcy: " + str(sim_average))
@@ -395,30 +401,36 @@ class Simulation:
         
         return sim_average
 
-class Expirement:
+
+class Experiment:
     """Run multiple simulations and show the data"""
-    
-    def __init__(self, config, account):
-        pass
-        
+
+    pass
+
+
 class Program:
     """Contain all of the elements of the program"""
     
     def __init__(self):
         self.config = Configuration(base_bet=1, payout=2, loss_adder=100)
-        self.account = Account(balance= 200)
+        self.account = Account(balance=200)
         self.sim = Simulation(self.config, self.account)
+
+        self.gui = None # Hold the gui as nothing until the program is called to run
+
+    def run(self):
+        """Create the gui, setting the program into motion"""
+
         self.gui = Gui(self.sim)
-        
+
+
 def main():     
-    """Call the expirement function"""
+    """Call the experiment function"""
     
     start_time = time.time()
-    
-    #test = Tests()
-    #test.run()
+
     program = Program()
-    
+    program.run()
     
     print("\nTime taken: --- %s seconds ---" % (time.time() - start_time))
 
