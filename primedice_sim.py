@@ -150,10 +150,10 @@ class Configuration:
         """
         self.base_bet = base_bet
   
-        self.payout = payout 
+        self.payout = payout
 
-        self.loss_adder = loss_adder    # Turn the user-given percent into a decimal
-        self.loss_adder_percent = self.loss_adder / 100 
+        self.loss_adder = loss_adder
+        self.loss_adder_decimal = self.loss_adder / 100  # Turn the user-given percent into a decimal
 
         self.win_chance = self.calc_win_chance()
         self.roll_under_value = self.win_chance
@@ -213,21 +213,20 @@ class Configuration:
     def set_loss_adder(self, new_val):
         """Change the loss adder value to be the given input, and update
         the loss adder percent value as well"""
-        self.loss_adder = new_val  # Turn the user-given percent into a decimal
-        self.loss_adder_percent = self.loss_adder / 100 
+        self.loss_adder = new_val
+        self.loss_adder_decimal = self.loss_adder / 100     # Turn the user-given percent into a decimal
     
     def get_base_bet(self):
-        """Return the current base bet
-        """
+        """Return the current base bet"""
         return self.base_bet
             
     def get_loss_adder(self):
-        """Return the current loss adder"""
+        """Return the current loss adder as a percent"""
         return self.loss_adder
 
-    def get_loss_adder_percent(self):
+    def get_loss_adder_decimal(self):
         """Return the current loss adder as a percent"""
-        return self.loss_adder_percent
+        return self.loss_adder_decimal
             
     def get_payout(self):
         """Return the current payout"""
@@ -307,7 +306,7 @@ class Simulation:
     
     def increase_bet(self):
         """Increase the current bet by the amount specified by the loss adder amount.""" 
-        self.current_bet += self.current_bet * self.config.get_loss_adder_percent()
+        self.current_bet += self.current_bet * self.config.get_loss_adder_decimal()
     
     def reset_bet(self):
         """Change the current best back to the bet value from the configuration."""
@@ -372,7 +371,7 @@ class Simulation:
     def print_settings(self):
         """Print the settings that are being accessed by the simulation"""
         
-        print("\n[MESSAGE] Running new simulation")
+        print("\n[MESSAGE] Running new simulation\n")
         print("Balance:", self.account.get_balance(), "\n")
         print("Base bet:", self.config.get_base_bet())
         print("Payout:", self.config.get_payout())
