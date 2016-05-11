@@ -89,7 +89,7 @@ class Gui:
         return payout_label, payout_input, payout_str
 
     def make_iterations_input(self):
-        """Construct an input field for the iterations value"""
+        """Construct and return an input field for the iterations value"""
         iterations_label = Label(self.master, text="Iterations:")
         iterations_label.grid(row=3, column=0)
 
@@ -102,7 +102,7 @@ class Gui:
         return iterations_label, iterations_input, iterations_str
 
     def make_loss_adder_input(self):
-        """Construct an input field for the loss adder value"""
+        """Construct and return an input field for the loss adder value"""
 
         loss_adder_label = Label(self.master, text="Loss Adder:")
         loss_adder_label.grid(row=4, column=0)
@@ -270,14 +270,29 @@ class Account:
 
 
 class Results:
-    """Contain the results of a simulation"""
+    """Contain the results of a simulation
+    or the average of the results of multiple simulations
+    """
     
-    def __init__(self, rolls_until_bankrupt, final_balance):
+    def __init__(self, rolls_until_bankrupt, average_balance):
         self.rolls_until_bankrupt = rolls_until_bankrupt
-        self.final_balance = final_balance
-            
+        self.average_balance = average_balance
+
+    def get_rolls_until_bankrupt(self):
+        return self.rolls_until_bankrupt
+
+    def get_average_balance(self):
+        return self.average_balance
+
     def get_results(self):
-            return self.rolls_until_bankrupt, self.final_balance
+        return self.rolls_until_bankrupt, self.average_balance
+
+    def print_results(self):
+        """Print out the results saved with explaining labels"""
+        print("\n[Results] Average rolls until bankruptcy: " + str(self.rolls_until_bankrupt))
+        print("[Results] Average balance during run: " + str(self.average_balance))
+
+        print("\n======================================================")
 
 
 class Simulation:
@@ -326,12 +341,15 @@ class Simulation:
                 
     def single_sim(self):
         """Simulate a single round of betting until bankruptcy.
-        Return the amount of rolls before then.
+        Return a result object containing the results of that one simulation.
         """
         
         rolls = 0
         self.reset_bet()
         sim_account = copy.copy(self.account)
+
+        # Create a running total of all of the balances to compute the average with
+        total_balances = sim_account.get_balance()
 
         while sim_account.get_balance() > self.current_bet:
             rolls += 1
@@ -342,11 +360,22 @@ class Simulation:
             else:
                     self.lose_roll()
 
-        return rolls    
+            total_balances += sim_account.get_balance()
+
+        if rolls == 0:
+            print("[WARNING] The given configurations do not allow for a single roll")
+
+        # The number of actual data points is one greater than the number of
+        # rolls because the roll count starts at 0
+        average_balance = total_balances / (rolls + 1)
+
+        sim_result = Results(rolls_until_bankrupt=rolls, average_balance=average_balance)
+
+        return sim_result
     
     def print_progress(self, sim_num, progress_checks, screen, progress_bar):
         """Print the current progress of the simulation.
-        progress_checks is just the amount of progress checks 
+        progress_checks is the amount of progress checks
         that the user wants to be printed during each simulation.
         """
         progress_ticks = 100 / progress_checks
@@ -362,7 +391,7 @@ class Simulation:
         # For the progress bar to work properly.
 
         if progress_checks > self.config.get_iterations():
-            # If this case does arise, just set the progress checks to be the same as the
+            # If this case does arise, set the progress checks to be the same as the
             # number of iterations, simplifying calculations
             progress_checks = self.config.get_iterations()
 
@@ -387,18 +416,24 @@ class Simulation:
         # the progress bar and refresh the screen when necessary
 
         self.print_settings()
-        total_result = 0
+
+        # Keep a running total of rolls from all simulations to calculate overall average.
+        total_rolls_result = 0
+        # Keep a running total of average balance from all simulations to calculate overall average.
+        total_balance_result = 0
+
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
             self.print_progress(sim_num, progress_checks, screen, progress_bar)
             sim_result = self.single_sim()
-            total_result += sim_result
-        sim_average = total_result / iterations
-        
-        print("[Results] Average rolls until bankruptcy: " + str(sim_average))
-        print("\n======================================================")
-        
-        return sim_average
+            total_rolls_result += sim_result.get_rolls_until_bankrupt()
+            total_balance_result += sim_result.get_average_balance()
+
+        sim_average_rolls = total_rolls_result / iterations
+        sim_average_balance = total_balance_result // iterations
+
+        sim_result = Results(rolls_until_bankrupt=sim_average_rolls, average_balance=sim_average_balance)
+        sim_result.print_results()
 
 
 class Experiment:
