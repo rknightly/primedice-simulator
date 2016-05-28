@@ -1,11 +1,11 @@
 # primedice-simulator
 A simulation to test different PrimeDice auto-bet settings. 
   
-Dependancies:
+***Dependancies:***
 
-matplotlib
-numpy
-python 3
+* matplotlib
+* numpy 
+* python 3  
 
 PrimeDice is an online bitcoin gambling website in which you can choose
 different values, such as your initial bet amount, the amount of "risk" 
