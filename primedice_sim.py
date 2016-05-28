@@ -2,13 +2,15 @@ import decimal
 import random
 import time
 import copy
+import numpy as np
+import itertools
 from tkinter import *
 from tkinter.ttk import *
 import matplotlib
-matplotlib.use("TkAgg")
+matplotlib.use("TkAgg")     # Allow matplotlib to work with Tkinter
+
+# noinspection PyPep8, Pep8
 from matplotlib import pyplot as plt
-import numpy as np
-import itertools
 
 
 class Gui:
@@ -56,7 +58,7 @@ class Gui:
         """Construct a button that runs the simulation"""
 
         run_button = Button(
-                    self.master, text="Run", command=self.run_simulator)
+            self.master, text="Run", command=self.run_simulator)
         run_button.grid(row=6, column=1)
 
         return run_button
@@ -154,14 +156,29 @@ class Gui:
     @staticmethod
     def graph_results(results):
         """Display the average simulation results on a graph"""
-        x_values = [num for num in range(1, results.get_num_of_rolls() + 1)]
-        y_values = results.get_average_balances()
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=.35)
 
-        plt.plot(x_values, y_values)
+        median_graph_x_values = [num for num in
+                                 range(len(results.get_meaningful_medians()))]
+        median_graph_y_values = results.get_meaningful_medians()
+        median_graph = fig.add_subplot(2, 1, 1)
 
-        plt.title("Simulation Results")
-        plt.xlabel("Roll #")
-        plt.ylabel("Average Balance")
+        median_graph.plot(median_graph_x_values, median_graph_y_values)
+
+        median_graph.set_title("Simulation Result Medians")
+        median_graph.set_xlabel("Roll #")
+        median_graph.set_ylabel("Median Balance")
+
+        mean_graph = fig.add_subplot(2, 1, 2)
+        mean_x_values = [num for num in
+                         range(len(results.get_average_balances()))]
+        mean_y_values = results.get_average_balances()
+        mean_graph.plot(mean_x_values, mean_y_values)
+
+        mean_graph.set_title("Simulation Result Means")
+        mean_graph.set_xlabel("Roll #")
+        mean_graph.set_ylabel("Mean Balance")
 
         plt.show()
 
@@ -280,40 +297,46 @@ class Account:
     """Contain the user's primedice account stats"""
 
     def __init__(self, balance):
-        self.balance = balance
+        self.balance = int(balance)
 
     def set_balance(self, new_balance):
         """Change the balance to be the given value"""
-        self.balance = new_balance
+        self.balance = int(new_balance)
 
     def add(self, new_val):
         """Add to the current account balance"""
-        self.balance += new_val
+
+        self.balance += int(new_val)
 
         return self.balance
 
     def subtract(self, new_val):
         """Subtract from the current account balance"""
-        self.balance -= new_val
+        self.balance -= int(new_val)
 
         return self.balance
 
     def get_balance(self):
         """Return the current balance"""
 
-        return self.balance
+        return int(self.balance)
 
 
 class AverageResults:
     """Contain the average of the results of multiple simulations"""
+
     def __init__(self, results_list):
         self.results_list = results_list
         self.number_of_results = len(self.results_list)
+        self.total_balances_list = [result.get_balances() for result in
+                                    self.results_list]
 
         self.overall_average_balance = self.find_average_bal_during_run()
         self.average_rolls_until_bankrupt = \
             self.find_average_rolls_until_bankrupt()
         self.average_balances = self.find_average_balances()
+        self.median_balances = self.find_median_balances()
+        self.meaningful_medians = self.find_meaningful_medians()
         self.num_of_rolls = len(self.average_balances)
 
     def find_average_bal_during_run(self):
@@ -345,20 +368,44 @@ class AverageResults:
         # Then, add the corresponding values of each list together to produce
         # one list of sums
 
-        total_balances_list = [result.get_balances() for result in
-                               self.results_list]
         sum_list = [sum(balances) for balances in
-                    itertools.zip_longest(*total_balances_list, fillvalue=0)]
+                    itertools.zip_longest(*self.total_balances_list,
+                                          fillvalue=0)]
 
         # Take the list of sums, and divide each one by the number of data
         # points to produce a mean value for each sum
-        average_list = [total_balance / len(total_balances_list) for
+        average_list = [total_balance / len(self.total_balances_list) for
                         total_balance in sum_list]
 
         return average_list
 
+    def find_median_balances(self):
+        """Find the median balances from the list of results"""
+
+        equal_length_total_balances = itertools.zip_longest(
+            *self.total_balances_list, fillvalue=0)
+
+        grouped_balances = zip(equal_length_total_balances)
+        median_balances = [np.median(balances) for
+                           balances in grouped_balances]
+
+        return median_balances
+
+    def find_meaningful_medians(self):
+        """Return only the medians of value, excluding the several medians with
+        a value of 0"""
+        meaningful_medians = self.median_balances
+        for pos, median in enumerate(self.median_balances):
+            if int(median) == 0:
+                meaningful_medians = meaningful_medians[:pos + 1]
+
+        return meaningful_medians
+
     def get_average_balances(self):
         return self.average_balances
+
+    def get_meaningful_medians(self):
+        return self.meaningful_medians
 
     def get_num_of_rolls(self):
         return self.num_of_rolls
@@ -380,7 +427,8 @@ class Results:
 
     def __init__(self, balances):
         self.balances = balances
-        self.rolls_until_bankrupt = len(balances)
+        # Initial balance does't count when counting the total rolls
+        self.rolls_until_bankrupt = len(balances[1:])
         self.average_balance = np.mean(balances)
 
     def get_rolls_until_bankrupt(self):
@@ -399,12 +447,13 @@ class Results:
 class Simulation:
     """Contain the simulation function and store the data of each simulation"""
 
-    def __init__(self, config, account):
+    def __init__(self, config, account, random_seed=None):
         self.config = config
         self.account = account
 
         self.current_bet = config.get_base_bet()
         self.total_balance_lists = []
+        random.seed(random_seed)
 
     def roll(self):
 
@@ -412,12 +461,16 @@ class Simulation:
         user or False if the roll was lost"""
 
         # Pick a random number between 0 and 100 out to two decimal places.
-        roll_value = random.randrange(0, 10000)/100
+        roll_value = random.randrange(0, 10000) / 100
+        print()
+        print("Roll:", roll_value)
 
         if roll_value < self.config.get_roll_under_value():
             win = True
+            print("Win roll")
         else:
             win = False
+            print("Lose roll")
 
         return win
 
@@ -457,16 +510,17 @@ class Simulation:
         sim_account = copy.copy(self.account)
 
         # Create a list of the balance after each roll
-        all_balances = []
-
-        while sim_account.get_balance() > self.current_bet:
+        # Start out with initial amount for 0 graph point
+        all_balances = [sim_account.get_balance()]
+        print("Starting Balance:", sim_account.get_balance())
+        while sim_account.get_balance() >= self.current_bet:
             sim_account.subtract(self.current_bet)
 
             if self.roll():
-                    self.win_roll(sim_account)
+                self.win_roll(sim_account)
             else:
-                    self.lose_roll()
-
+                self.lose_roll()
+            print("Balance after roll:", sim_account.get_balance())
             all_balances.append(sim_account.get_balance())
 
         if len(all_balances) == 0:

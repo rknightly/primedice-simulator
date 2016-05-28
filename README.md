@@ -1,7 +1,7 @@
 # primedice-simulator
 A simulation to test different PrimeDice auto-bet settings. 
   
-***Dependancies:***
+***Dependencies:***
 
 * matplotlib
 * numpy 
