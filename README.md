@@ -21,6 +21,6 @@ bankrupt each time. The output is then the average of those several
 simulations, and it gives a good idea of roughly how long you would 
 have until you go bankrupt.
   
-One interesting aspect to point out is that, as many billions of 
+One interesting aspect to point out is that, as many millions of 
 simulations I have run, the player has always gone bankrupt eventually. 
 I think that says a thing or two about the nature of gambling.
