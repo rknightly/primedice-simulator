@@ -157,9 +157,6 @@ class Gui:
         x_values = [num for num in range(1, results.get_num_of_rolls() + 1)]
         y_values = results.get_average_balances()
 
-        print(x_values)
-        print(y_values)
-
         plt.plot(x_values, y_values)
 
         plt.title("Simulation Results")
