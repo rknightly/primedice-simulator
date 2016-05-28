@@ -4,6 +4,9 @@ import time
 import copy
 from tkinter import *
 from tkinter.ttk import *
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib import pyplot as plt
 import numpy as np
 import itertools
 
@@ -46,7 +49,8 @@ class Gui:
         # update the progress bar and then refresh the screen when the progress
         # checkpoints are hit
 
-        self.sim.run(self.progress_bar, self.master)
+        sim_results = self.sim.run(self.progress_bar, self.master)
+        self.graph_results(sim_results)
 
     def make_run_button(self):
         """Construct a button that runs the simulation"""
@@ -146,6 +150,23 @@ class Gui:
         self.sim.config.set_payout(float(self.payout_str.get()))
         self.sim.config.set_iterations(int(self.iterations_str.get()))
         self.sim.config.set_loss_adder(int(self.loss_adder_str.get()))
+
+    @staticmethod
+    def graph_results(results):
+        """Display the average simulation results on a graph"""
+        x_values = [num for num in range(1, results.get_num_of_rolls() + 1)]
+        y_values = results.get_average_balances()
+
+        print(x_values)
+        print(y_values)
+
+        plt.plot(x_values, y_values)
+
+        plt.title("Simulation Results")
+        plt.xlabel("Roll #")
+        plt.ylabel("Average Balance")
+
+        plt.show()
 
 
 class Configuration:
@@ -295,6 +316,8 @@ class AverageResults:
         self.overall_average_balance = self.find_average_bal_during_run()
         self.average_rolls_until_bankrupt = \
             self.find_average_rolls_until_bankrupt()
+        self.average_balances = self.find_average_balances()
+        self.num_of_rolls = len(self.average_balances)
 
     def find_average_bal_during_run(self):
         """Calculate the average balance before bankruptcy of each run"""
@@ -316,6 +339,32 @@ class AverageResults:
         average = total / self.number_of_results
 
         return average
+
+    def find_average_balances(self):
+        """Find the average balances from the list of results"""
+
+        # Produce a lists of lists that are all of the same length by adding
+        # zeros to the end of any list that is too short.
+        # Then, add the corresponding values of each list together to produce
+        # one list of sums
+
+        total_balances_list = [result.get_balances() for result in
+                               self.results_list]
+        sum_list = [sum(balances) for balances in
+                    itertools.zip_longest(*total_balances_list, fillvalue=0)]
+
+        # Take the list of sums, and divide each one by the number of data
+        # points to produce a mean value for each sum
+        average_list = [total_balance / len(total_balances_list) for
+                        total_balance in sum_list]
+
+        return average_list
+
+    def get_average_balances(self):
+        return self.average_balances
+
+    def get_num_of_rolls(self):
+        return self.num_of_rolls
 
     def print_results(self):
         """Print out the results saved with explaining labels"""
@@ -500,6 +549,8 @@ class Simulation:
 
         sim_result = AverageResults(each_sim_result)
         sim_result.print_results()
+
+        return sim_result
 
 
 class Experiment:
