@@ -4,6 +4,8 @@ import time
 import copy
 from tkinter import *
 from tkinter.ttk import *
+import numpy as np
+import itertools
 
 
 class Gui:
@@ -284,14 +286,56 @@ class Account:
         return self.balance
 
 
+class AverageResults:
+    """Contain the average of the results of multiple simulations"""
+    def __init__(self, results_list):
+        self.results_list = results_list
+        self.number_of_results = len(self.results_list)
+
+        self.overall_average_balance = self.find_average_bal_during_run()
+        self.average_rolls_until_bankrupt = \
+            self.find_average_rolls_until_bankrupt()
+
+    def find_average_bal_during_run(self):
+        """Calculate the average balance before bankruptcy of each run"""
+        total = 0
+        for result in self.results_list:
+            total += result.get_average_balance()
+        average = total / self.number_of_results
+
+        return average
+
+    def find_average_rolls_until_bankrupt(self):
+        """Calculate the average number of rolls until bankruptcy in each
+         run
+         """
+
+        total = 0
+        for result in self.results_list:
+            total += result.get_rolls_until_bankrupt()
+        average = total / self.number_of_results
+
+        return average
+
+    def print_results(self):
+        """Print out the results saved with explaining labels"""
+        print("\n[Results] Average rolls until bankruptcy: " +
+              str(self.average_rolls_until_bankrupt))
+        print("[Results] Average balance during run: " +
+              str(self.overall_average_balance))
+
+        print("\n======================================================")
+
+
 class Results:
     """Contain the results of a simulation
     or the average of the results of multiple simulations
     """
 
-    def __init__(self, rolls_until_bankrupt, average_balance):
-        self.rolls_until_bankrupt = rolls_until_bankrupt
-        self.average_balance = average_balance
+    def __init__(self, balances):
+        self.balances = balances
+        self.rolls_until_bankrupt = len(balances)
+        self.average_balance = np.mean(balances)
 
     def get_rolls_until_bankrupt(self):
         return self.rolls_until_bankrupt
@@ -302,14 +346,8 @@ class Results:
     def get_results(self):
         return self.rolls_until_bankrupt, self.average_balance
 
-    def print_results(self):
-        """Print out the results saved with explaining labels"""
-        print("\n[Results] Average rolls until bankruptcy: " +
-              str(self.rolls_until_bankrupt))
-        print("[Results] Average balance during run: " +
-              str(self.average_balance))
-
-        print("\n======================================================")
+    def get_balances(self):
+        return self.balances
 
 
 class Simulation:
@@ -320,6 +358,7 @@ class Simulation:
         self.account = account
 
         self.current_bet = config.get_base_bet()
+        self.total_balance_lists = []
 
     def roll(self):
 
@@ -368,16 +407,13 @@ class Simulation:
         Return a result object containing the results of that one simulation.
         """
 
-        rolls = 0
         self.reset_bet()
         sim_account = copy.copy(self.account)
 
-        # Create a running total of all of the balances to compute the average
-        # with
-        total_balances = sim_account.get_balance()
+        # Create a list of the balance after each roll
+        all_balances = []
 
         while sim_account.get_balance() > self.current_bet:
-            rolls += 1
             sim_account.subtract(self.current_bet)
 
             if self.roll():
@@ -385,18 +421,16 @@ class Simulation:
             else:
                     self.lose_roll()
 
-            total_balances += sim_account.get_balance()
+            all_balances.append(sim_account.get_balance())
 
-        if rolls == 0:
+        if len(all_balances) == 0:
             print("[WARNING] The given configurations do not allow for a" +
                   " single roll")
 
         # The number of actual data points is one greater than the number of
         # rolls because the roll count starts at 0
-        average_balance = total_balances / (rolls + 1)
 
-        sim_result = Results(rolls_until_bankrupt=rolls,
-                             average_balance=average_balance)
+        sim_result = Results(balances=all_balances)
 
         return sim_result
 
@@ -452,19 +486,19 @@ class Simulation:
         # Keep a running total of average balance from all simulations to
         # calculate overall average.
         total_balance_result = 0
+        self.total_balance_lists = []
+        each_sim_result = []
 
         iterations = self.config.get_iterations()
         for sim_num in range(iterations):
             self.print_progress(sim_num, progress_checks, screen, progress_bar)
             sim_result = self.single_sim()
+            each_sim_result.append(sim_result)
             total_rolls_result += sim_result.get_rolls_until_bankrupt()
             total_balance_result += sim_result.get_average_balance()
+            self.total_balance_lists.append(sim_result.get_balances())
 
-        sim_average_rolls = total_rolls_result / iterations
-        sim_average_balance = total_balance_result // iterations
-
-        sim_result = Results(rolls_until_bankrupt=sim_average_rolls,
-                             average_balance=sim_average_balance)
+        sim_result = AverageResults(each_sim_result)
         sim_result.print_results()
 
 
