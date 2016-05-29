@@ -9,7 +9,6 @@ from tkinter.ttk import *
 import matplotlib
 matplotlib.use("TkAgg")     # Allow matplotlib to work with Tkinter
 
-# noinspection PyPep8, Pep8
 from matplotlib import pyplot as plt
 
 
@@ -421,9 +420,7 @@ class AverageResults:
 
 
 class Results:
-    """Contain the results of a simulation
-    or the average of the results of multiple simulations
-    """
+    """Contain the results of a simulation"""
 
     def __init__(self, balances):
         self.balances = balances
@@ -463,6 +460,7 @@ class Simulation:
         # Pick a random number between 0 and 100 out to two decimal places.
         roll_value = random.randrange(0, 10000) / 100
         print()
+        print("Roll under value:", self.config.get_roll_under_value())
         print("Roll:", roll_value)
 
         if roll_value < self.config.get_roll_under_value():
