@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import decimal
 import random
 import time
@@ -152,27 +154,40 @@ class Gui:
         self.sim.config.set_iterations(int(self.iterations_str.get()))
         self.sim.config.set_loss_adder(int(self.loss_adder_str.get()))
 
-    @staticmethod
-    def graph_results(results):
+    def graph_results(self, results):
         """Display the average simulation results on a graph"""
+        # fig = plt.figure()
+        # fig.subplots_adjust(hspace=.35)
+
+        # median_x_values = [num for num in
+        #                          range(len(results.get_meaningful_medians()))]
+        # median_y_values = results.get_meaningful_medians()
+
+        # print("Meaningful medians:", results.get_meaningful_medians())
+        # print("Enumerated meaningful medians:",
+        #       list(enumerate(results.get_meaningful_medians())))
+        # print("Zipped enumerated meaningful medians:",
+        #       list(zip(*enumerate(results.get_meaningful_medians()))))
+
         fig = plt.figure()
         fig.subplots_adjust(hspace=.35)
 
-        median_graph_x_values = [num for num in
-                                 range(len(results.get_meaningful_medians()))]
-        median_graph_y_values = results.get_meaningful_medians()
+        median_x_values, median_y_values = \
+            zip(*enumerate(results.get_meaningful_medians()))
         median_graph = fig.add_subplot(2, 1, 1)
 
-        median_graph.plot(median_graph_x_values, median_graph_y_values)
+        median_graph.plot(median_x_values, median_y_values)
 
         median_graph.set_title("Simulation Result Medians")
         median_graph.set_xlabel("Roll #")
         median_graph.set_ylabel("Median Balance")
 
         mean_graph = fig.add_subplot(2, 1, 2)
-        mean_x_values = [num for num in
-                         range(len(results.get_average_balances()))]
-        mean_y_values = results.get_average_balances()
+        # mean_x_values = [num for num in
+        #                  range(len(results.get_average_balances()))]
+        # mean_y_values = results.get_average_balances()
+        mean_x_values, mean_y_values = \
+            zip(*enumerate(results.get_average_balances()))
         mean_graph.plot(mean_x_values, mean_y_values)
 
         mean_graph.set_title("Simulation Result Means")
@@ -187,7 +202,7 @@ class Configuration:
     primedice auto-better provides.
     """
 
-    def __init__(self, base_bet, payout, iterations=100, loss_adder=0):
+    def __init__(self, base_bet, payout, iterations=100, loss_adder=100):
         """These are the different settings that can be given to the auto-better.
         All of the values should be given as they are on the primedice screen.
         payout - float multiplier between 1.01202 and 9900
@@ -459,16 +474,14 @@ class Simulation:
 
         # Pick a random number between 0 and 100 out to two decimal places.
         roll_value = random.randrange(0, 10000) / 100
-        print()
-        print("Roll under value:", self.config.get_roll_under_value())
-        print("Roll:", roll_value)
+        # print()
+        # print("Roll under value:", self.config.get_roll_under_value())
+        # print("Roll:", roll_value)
 
         if roll_value < self.config.get_roll_under_value():
             win = True
-            print("Win roll")
         else:
             win = False
-            print("Lose roll")
 
         return win
 
@@ -510,7 +523,6 @@ class Simulation:
         # Create a list of the balance after each roll
         # Start out with initial amount for 0 graph point
         all_balances = [sim_account.get_balance()]
-        print("Starting Balance:", sim_account.get_balance())
         while sim_account.get_balance() >= self.current_bet:
             sim_account.subtract(self.current_bet)
 
@@ -518,7 +530,6 @@ class Simulation:
                 self.win_roll(sim_account)
             else:
                 self.lose_roll()
-            print("Balance after roll:", sim_account.get_balance())
             all_balances.append(sim_account.get_balance())
 
         if len(all_balances) == 0:
