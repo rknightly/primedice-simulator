@@ -190,11 +190,11 @@ class Gui:
         median_graph.set_ylabel("Median Balance")
 
         mean_graph = self.graph_fig.add_subplot(2, 1, 2)
-        # mean_x_values = [num for num in
-        #                  range(len(results.get_average_balances()))]
-        # mean_y_values = results.get_average_balances()
+
+        mean_values_to_graph = \
+            self.sim_results.get_average_balances()[:len(median_x_values) * 2]
         mean_x_values, mean_y_values = \
-            zip(*enumerate(self.sim_results.get_average_balances()))
+            zip(*enumerate(mean_values_to_graph))
         mean_graph.plot(mean_x_values, mean_y_values)
 
         mean_graph.set_title("Simulation Result Means")
@@ -509,7 +509,6 @@ class Simulation:
 
     def lose_roll(self):
         """Simulate a lost roll"""
-
         self.increase_bet()
 
     def win_roll(self, account):

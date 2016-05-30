@@ -222,6 +222,49 @@ class TestLoseRoll(TestCase):
                          "Bet did not remain constant after loss when"
                          "loss_adder was 0")
 
+    def test_balance_not_changed(self):
+        from primedice_sim import Configuration, Simulation, Account
+        account = Account(balance=100)
+        config = Configuration(base_bet=10, payout=2, loss_adder=0)
+        simulation = Simulation(config=config, account=account)
+
+        simulation.lose_roll()
+        # The balance should not be changed after a roll is lost, because the
+        # account is charged only once before the roll and is not charged again
+        # regardless of a win or loss.
+        self.assertEqual(simulation.account.get_balance(), 100,
+                         "Balance was changed when roll was lost.")
+
+
+class TestWinRoll(TestCase):
+    """Ensure that the balance is appropriately increased when a roll is won"""
+
+    def test_integer_payout(self):
+        from primedice_sim import Configuration, Account, Simulation
+
+        config = Configuration(base_bet=10, payout=2, loss_adder=100)
+        account = Account(balance=100)
+        simulation = Simulation(config=config, account=account)
+
+        simulation.account.subtract(10)
+        simulation.win_roll(simulation.account)
+        self.assertEqual(simulation.account.get_balance(), 110,
+                         "Balance not properly increased with a payout of"
+                         " 2X")
+
+    def test_frac_payout(self):
+        from primedice_sim import Configuration, Account, Simulation
+
+        config = Configuration(base_bet=10, payout=1.5, loss_adder=50)
+        account = Account(balance=100)
+        simulation = Simulation(config=config, account=account)
+
+        simulation.account.subtract(10)
+        simulation.win_roll(simulation.account)
+        self.assertEqual(simulation.account.get_balance(), 105,
+                         "Balance not properly increased with a payout of"
+                         "1.5X")
+
 
 class TestSingleSim(TestCase):
     """Ensure that in a single simulation, the order of balances is correctly
