@@ -2,6 +2,9 @@ from unittest import TestCase
 
 
 class TestRoll(TestCase):
+    """Assure that the rolling method functions appropriately, with the ability
+    to win and lose when the roll is low or too high, respectively
+    """
 
     def setUp(self):
         from primedice_sim import Account
@@ -99,6 +102,10 @@ class TestRoll(TestCase):
 
 
 class TestIncreaseBet(TestCase):
+    """Ensure that the bet is increased appropriately when the increase_bet
+    method is called
+    """
+
     def setUp(self):
         from primedice_sim import Account
 
@@ -124,46 +131,104 @@ class TestIncreaseBet(TestCase):
                          "Current bet was not increased properly in Test 2")
 
 
-class TestSimulation(TestCase):
+class TestResetBet(TestCase):
+    """Ensure that the bet is appropriately reset to its initial value when
+    reset_bet() is called
+    """
 
-    def test_increase_bet(self):
-        from primedice_sim import Configuration, Account, Simulation
+    def setUp(self):
+        from primedice_sim import Account
+        self.account = Account(balance=100)
 
-        config = Configuration(base_bet=4, payout=2, loss_adder=100)
-        account = Account(balance=50)
-        simulation = Simulation(config=config, account=account)
+    def test_reset_single_roll(self):
+        from primedice_sim import Configuration, Simulation
 
+        config = Configuration(base_bet=7, payout=2, loss_adder=200)
+        simulation = Simulation(config=config, account=self.account)
         simulation.increase_bet()
-        self.assertEqual(simulation.current_bet, 8,
-                         "Current bet was not increased properly in Test 1")
+        simulation.reset_bet()
 
-        config = Configuration(base_bet=1, payout=3, loss_adder=50)
-        simulation = Simulation(config=config, account=account)
-        simulation.increase_bet()
-        self.assertEqual(simulation.current_bet, 1.5,
-                         "Current bet was not increased properly in Test 2")
+        self.assertEqual(simulation.current_bet, 7,
+                         "Bet was not reset properly after it was increased a"
+                         " single time")
 
-    def test_reset_bet(self):
-        from primedice_sim import Configuration, Account, Simulation
+    def test_reset_multiple_rolls(self):
+        from primedice_sim import Configuration, Simulation
 
         config = Configuration(base_bet=10, payout=2, loss_adder=200)
-        account = Account(balance=1000)
-        simulation = Simulation(config=config, account=account)
+        simulation = Simulation(config=config, account=self.account)
         for _ in range(6):
             simulation.increase_bet()
         simulation.reset_bet()
+
         self.assertEqual(simulation.current_bet, 10,
-                         "Bet was not reset properly in Test 2")
+                         "Bet was not reset properly after it was increased"
+                         " multiple times")
+
+    def test_reset_without_rolling(self):
+        from primedice_sim import Configuration, Simulation
 
         config = Configuration(base_bet=1, payout=5, loss_adder=100)
-        simulation = Simulation(config=config, account=account)
-        for _ in range(3):
-            simulation.increase_bet()
+        simulation = Simulation(config=config, account=self.account)
+        # No increases or decreases made
         simulation.reset_bet()
-        self.assertEqual(simulation.current_bet, 1,
-                         "Bet was not reset properly in Test 2")
 
-    def test_run(self):
+        self.assertEqual(simulation.current_bet, 1,
+                         "Bet was not reset properly when no changes were made"
+                         " between resets")
+
+
+class TestLoseRoll(TestCase):
+    """Assure that the bet is appropriately increased after a roll is lost"""
+
+    def setUp(self):
+        from primedice_sim import Account
+        self.account = Account(balance=100)
+
+    def test_single_lose_roll(self):
+        from primedice_sim import Configuration, Simulation
+        config = Configuration(base_bet=4, payout=2, loss_adder=100)
+        simulation = Simulation(config=config, account=self.account)
+        simulation.lose_roll()
+        self.assertEqual(simulation.current_bet, 8,
+                         "Bet was not correctly increased after single loss"
+                         "with 100% loss increase")
+
+    def test_multiple_loose_roll(self):
+        from primedice_sim import Configuration, Simulation
+        config = Configuration(base_bet=4, payout=2, loss_adder=100)
+        simulation = Simulation(config=config, account=self.account)
+        for _ in range(4):
+            simulation.lose_roll()
+        self.assertEqual(simulation.current_bet, 64,
+                         "Bet was not correctly increased after multiple"
+                         " losses with 100% loss increase")
+
+    def test_frac_adder(self):
+        from primedice_sim import Configuration, Simulation
+        config = Configuration(base_bet=4, payout=2, loss_adder=50)
+        simulation = Simulation(config=config, account=self.account)
+        simulation.lose_roll()
+        self.assertEqual(simulation.current_bet, 6,
+                         "Bet was not correctly increased after single loss"
+                         "with 50% loss increase")
+
+    def test_lose_0_adder(self):
+        from primedice_sim import Configuration, Simulation
+        config = Configuration(base_bet=10, payout=2, loss_adder=0)
+        simulation = Simulation(config=config, account=self.account)
+        simulation.lose_roll()
+        self.assertEqual(simulation.current_bet, 10,
+                         "Bet did not remain constant after loss when"
+                         "loss_adder was 0")
+
+
+class TestSingleSim(TestCase):
+    """Ensure that in a single simulation, the order of balances is correctly
+    collected and returned.
+    """
+
+    def test_single_sim_base_1(self):
         from primedice_sim import Configuration, Account, Simulation
 
         config = Configuration(base_bet=1, payout=2, iterations=1,
@@ -171,21 +236,22 @@ class TestSimulation(TestCase):
         account = Account(balance=5)
         simulation = Simulation(config=config, account=account,
                                 random_seed=4)
-
         sim_result = simulation.single_sim()
-        self.assertEqual(sim_result.get_rolls_until_bankrupt(), 17,
-                         "Incorrect number of rolls until bankrupt in Test 1")
+
         self.assertEqual(sim_result.get_balances(),
                          [5, 6, 5, 7, 6, 4, 8, 9, 10, 11, 10, 8, 12, 13, 14,
-                          13, 11, 7],
-                         "Incorrect sequence of balances in Test 1")
+                          13, 11, 7], "Incorrect sequence of balances in "
+                                      "single simulation, base_bet=1")
+
+    def test_single_sim_base_2(self):
+        from primedice_sim import Configuration, Account, Simulation
 
         config = Configuration(base_bet=2, payout=2, iterations=1,
                                loss_adder=100)
         account = Account(balance=10)
         simulation = Simulation(config=config, account=account, random_seed=12)
         sim_result = simulation.single_sim()
-        self.assertEqual(sim_result.get_rolls_until_bankrupt(), 4,
-                         "Incorrect number of rolls until bankrupt in Test 2")
+
         self.assertEqual(sim_result.get_balances(), [10, 8, 12, 10, 6],
-                         "Incorrect sequence of balances in Test 2")
+                         "Incorrect sequence of balances in single simulation,"
+                         "base_bet=2")

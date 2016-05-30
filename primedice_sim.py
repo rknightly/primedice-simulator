@@ -10,7 +10,6 @@ from tkinter import *
 from tkinter.ttk import *
 import matplotlib
 matplotlib.use("TkAgg")     # Allow matplotlib to work with Tkinter
-
 from matplotlib import pyplot as plt
 
 
@@ -39,6 +38,9 @@ class Gui:
 
         self.progress_label, self.progress_bar = self.make_progress_bar()
 
+        self.graph_fig = self.make_graph()
+        self.sim_results = None     # Placeholder for when results come in
+
         self.master.mainloop()
 
     def run_simulator(self):
@@ -52,8 +54,8 @@ class Gui:
         # update the progress bar and then refresh the screen when the progress
         # checkpoints are hit
 
-        sim_results = self.sim.run(self.progress_bar, self.master)
-        self.graph_results(sim_results)
+        self.sim_results = self.sim.run(self.progress_bar, self.master)
+        self.graph_results()
 
     def make_run_button(self):
         """Construct a button that runs the simulation"""
@@ -154,7 +156,15 @@ class Gui:
         self.sim.config.set_iterations(int(self.iterations_str.get()))
         self.sim.config.set_loss_adder(int(self.loss_adder_str.get()))
 
-    def graph_results(self, results):
+    @staticmethod
+    def make_graph():
+
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=.35)
+
+        return fig
+
+    def graph_results(self):
         """Display the average simulation results on a graph"""
         # fig = plt.figure()
         # fig.subplots_adjust(hspace=.35)
@@ -169,12 +179,9 @@ class Gui:
         # print("Zipped enumerated meaningful medians:",
         #       list(zip(*enumerate(results.get_meaningful_medians()))))
 
-        fig = plt.figure()
-        fig.subplots_adjust(hspace=.35)
-
         median_x_values, median_y_values = \
-            zip(*enumerate(results.get_meaningful_medians()))
-        median_graph = fig.add_subplot(2, 1, 1)
+            zip(*enumerate(self.sim_results.get_meaningful_medians()))
+        median_graph = self.graph_fig.add_subplot(2, 1, 1)
 
         median_graph.plot(median_x_values, median_y_values)
 
@@ -182,12 +189,12 @@ class Gui:
         median_graph.set_xlabel("Roll #")
         median_graph.set_ylabel("Median Balance")
 
-        mean_graph = fig.add_subplot(2, 1, 2)
+        mean_graph = self.graph_fig.add_subplot(2, 1, 2)
         # mean_x_values = [num for num in
         #                  range(len(results.get_average_balances()))]
         # mean_y_values = results.get_average_balances()
         mean_x_values, mean_y_values = \
-            zip(*enumerate(results.get_average_balances()))
+            zip(*enumerate(self.sim_results.get_average_balances()))
         mean_graph.plot(mean_x_values, mean_y_values)
 
         mean_graph.set_title("Simulation Result Means")
