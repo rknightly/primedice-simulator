@@ -261,9 +261,10 @@ class Configuration:
         if payout_minimum <= self.payout <= payout_maximum:
             valid = True
         else:
-            print("[WARNING] Payout value entered was not within the range" +
-                  "allowed by PrimeDice")
+            print("[WARNING] Payout value entered was not within the range"
+                  " allowed by PrimeDice")
             valid = False
+            print(self.payout)
 
         return valid
 
@@ -324,10 +325,12 @@ class Account:
         """Change the balance to be the given value"""
         self.balance = int(new_balance)
 
-    def add(self, new_val):
+    def add(self, amount_to_add):
         """Add to the current account balance"""
 
-        self.balance += int(new_val)
+        # The balance should remain an integer, regardless of the amount added
+        # to it
+        self.balance += int(amount_to_add)
 
         return self.balance
 
@@ -352,15 +355,18 @@ class AverageResults:
         self.total_balances_list = [result.get_balances() for result in
                                     self.results_list]
 
-        self.overall_average_balance = self.find_average_bal_during_run()
+        self.overall_average_balance = self.find_average_bal()
         self.average_rolls_until_bankrupt = \
             self.find_average_rolls_until_bankrupt()
         self.average_balances = self.find_average_balances()
         self.median_balances = self.find_median_balances()
         self.num_of_rolls = len(self.average_balances)
 
-    def find_average_bal_during_run(self):
-        """Calculate the average balance before bankruptcy of each run"""
+    def find_average_bal(self):
+        """Calculate the average balance of all rolls before bankruptcy of
+        each run
+        """
+
         total = 0
         for result in self.results_list:
             total += result.get_average_balance()
@@ -374,6 +380,7 @@ class AverageResults:
          """
 
         total = 0
+        # Average each individual result and find the average of those values
         for result in self.results_list:
             total += result.get_rolls_until_bankrupt()
         average = total / self.number_of_results

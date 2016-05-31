@@ -2,6 +2,7 @@ from unittest import TestCase
 
 
 class TestCalcRollUnderValue(TestCase):
+    """Make sure that the roll_under_value is appropriately calculated"""
 
     def test_mid_payout(self):
         from primedice_sim import Configuration
@@ -26,6 +27,31 @@ class TestCalcRollUnderValue(TestCase):
         self.assertEquals(config.calc_roll_under_value(), 66.0,
                           "Roll under value incorrectly calculated with low"
                           " payout of 1.5")
+
+
+class TestCheckValidPayout(TestCase):
+    "Ensure that the payout is appropriately checked for validity"
+
+    def test_valid_value(self):
+        from primedice_sim import Configuration
+        config = Configuration(base_bet=1, payout=3)
+        self.assertTrue(config.check_valid_payout(), "Valid payout value of 3"
+                                                     "was marked as invalid")
+
+    def test_too_high(self):
+        from primedice_sim import Configuration
+        config = Configuration(base_bet=1, payout=10000)
+        self.assertFalse(config.check_valid_payout(), "Invalid payout value of"
+                                                      " 10000 was marked as"
+                                                      " valid, but it is too"
+                                                      "high")
+
+    def test_too_low(self):
+        from primedice_sim import Configuration
+        config = Configuration(base_bet=1, payout=1)
+        self.assertFalse(config.check_valid_payout(), "Invalid payout value of"
+                                                      " 1 was marked as valid,"
+                                                      " but it is too low")
 
 
 class TestSetPayout(TestCase):
