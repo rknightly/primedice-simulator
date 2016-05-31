@@ -1,17 +1,47 @@
 from unittest import TestCase
 
 
-class TestConfiguration(TestCase):
-    def test_calc_win_chance(self):
+class TestCalcRollUnderValue(TestCase):
+
+    def test_mid_payout(self):
         from primedice_sim import Configuration
+
         config = Configuration(base_bet=1, payout=2)
-        self.assertEquals(config.calc_win_chance(), 49.5,
-                          "Win chance incorrectly calculated in Test 1")
+        self.assertEquals(config.calc_roll_under_value(), 49.5,
+                          "Roll under value incorrectly calculated with medium"
+                          " payout of 2")
+
+    def test_high_payout(self):
+        from primedice_sim import Configuration
 
         config = Configuration(base_bet=1, payout=3)
-        self.assertEquals(config.calc_win_chance(), 33.0,
-                          "Win chance incorrectly calculated in Test 2")
+        self.assertEquals(config.calc_roll_under_value(), 33.0,
+                          "Roll under value incorrectly calculated with high"
+                          " payout of 3")
+
+    def test_low_payout(self):
+        from primedice_sim import Configuration
 
         config = Configuration(base_bet=1, payout=1.5)
-        self.assertEquals(config.calc_win_chance(), 66.0,
-                          "Win chance incorrectly calculated in Test 3")
+        self.assertEquals(config.calc_roll_under_value(), 66.0,
+                          "Roll under value incorrectly calculated with low"
+                          " payout of 1.5")
+
+
+class TestSetPayout(TestCase):
+    """Ensure that payout and roll under values change accordingly"""
+
+    def test_payout_change(self):
+        from primedice_sim import Configuration
+        config = Configuration(base_bet=2, payout=2)
+        config.set_payout(3)
+        self.assertEqual(config.get_payout(), 3, "Payout was not set"
+                                                 " appropriately")
+
+    def test_roll_under_change(self):
+        from primedice_sim import Configuration
+        config = Configuration(base_bet=2, payout=2)
+        config.set_payout(3)
+        self.assertEqual(config.get_roll_under_value(), 33.0,
+                         "Roll under value was not also set when set_payout"
+                         " was called")

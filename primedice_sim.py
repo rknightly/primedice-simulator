@@ -17,7 +17,7 @@ class Gui:
     def __init__(self, simulation):
         """Display the inputs for the configuration values and their values"""
 
-        self.sim = simulation
+        self.sim = simulation   # A starting simulation with default values
 
         self.master = Tk()
         self.master.title("Primedice Simulator")
@@ -180,7 +180,7 @@ class Gui:
         #       list(zip(*enumerate(results.get_meaningful_medians()))))
 
         median_x_values, median_y_values = \
-            zip(*enumerate(self.sim_results.get_meaningful_medians()))
+            zip(*enumerate(self.sim_results.get_median_balances()))
         median_graph = self.graph_fig.add_subplot(2, 1, 1)
 
         median_graph.plot(median_x_values, median_y_values)
@@ -192,7 +192,7 @@ class Gui:
         mean_graph = self.graph_fig.add_subplot(2, 1, 2)
 
         mean_values_to_graph = \
-            self.sim_results.get_average_balances()[:len(median_x_values) * 2]
+            self.sim_results.get_average_balances()
         mean_x_values, mean_y_values = \
             zip(*enumerate(mean_values_to_graph))
         mean_graph.plot(mean_x_values, mean_y_values)
@@ -223,12 +223,10 @@ class Configuration:
 
         # Turn the user-given percent into a decimal
         self.loss_adder_decimal = self.loss_adder / 100
-
-        self.win_chance = self.calc_win_chance()
-        self.roll_under_value = self.win_chance
+        self.roll_under_value = self.calc_roll_under_value()
         self.iterations = iterations
 
-    def calc_win_chance(self):
+    def calc_roll_under_value(self):
         """Find the win chance that primedice will use with a given win payout.
         """
 
@@ -276,6 +274,8 @@ class Configuration:
     def set_payout(self, new_val):
         """Change the payout value to be the given input"""
         self.payout = new_val
+        # The roll under value changes with the payout
+        self.roll_under_value = self.calc_roll_under_value()
 
     def set_iterations(self, new_val):
         """Change the iterations value to be the given input"""
@@ -357,7 +357,6 @@ class AverageResults:
             self.find_average_rolls_until_bankrupt()
         self.average_balances = self.find_average_balances()
         self.median_balances = self.find_median_balances()
-        self.meaningful_medians = self.find_meaningful_medians()
         self.num_of_rolls = len(self.average_balances)
 
     def find_average_bal_during_run(self):
@@ -395,7 +394,8 @@ class AverageResults:
 
         # Take the list of sums, and divide each one by the number of data
         # points to produce a mean value for each sum
-        average_list = [total_balance / len(self.total_balances_list) for
+        num_of_balances = len(self.total_balances_list)
+        average_list = [total_balance // num_of_balances for
                         total_balance in sum_list]
 
         return average_list
@@ -407,26 +407,21 @@ class AverageResults:
             *self.total_balances_list, fillvalue=0)
 
         grouped_balances = zip(equal_length_total_balances)
-        median_balances = [np.median(balances) for
-                           balances in grouped_balances]
+        median_balances = []
+        for balances in grouped_balances:
+            median = np.median(balances)
+            median_balances.append(median)
+            # Stop calculating medians once they reach 0
+            if median == 0:
+                break
 
         return median_balances
-
-    def find_meaningful_medians(self):
-        """Return only the medians of value, excluding the several medians with
-        a value of 0"""
-        meaningful_medians = self.median_balances
-        for pos, median in enumerate(self.median_balances):
-            if int(median) == 0:
-                meaningful_medians = meaningful_medians[:pos + 1]
-
-        return meaningful_medians
 
     def get_average_balances(self):
         return self.average_balances
 
-    def get_meaningful_medians(self):
-        return self.meaningful_medians
+    def get_median_balances(self):
+        return self.median_balances
 
     def get_num_of_rolls(self):
         return self.num_of_rolls
@@ -484,7 +479,6 @@ class Simulation:
         # print()
         # print("Roll under value:", self.config.get_roll_under_value())
         # print("Roll:", roll_value)
-
         if roll_value < self.config.get_roll_under_value():
             win = True
         else:
@@ -543,9 +537,6 @@ class Simulation:
         if len(all_balances) == 0:
             print("[WARNING] The given configurations do not allow for a" +
                   " single roll")
-
-        # The number of actual data points is one greater than the number of
-        # rolls because the roll count starts at 0
 
         sim_result = Results(balances=all_balances)
 

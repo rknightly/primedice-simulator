@@ -31,8 +31,8 @@ class TestRoll(TestCase):
                                 random_seed=12)
         # First roll with random_seed(12) is 77.75
         # Roll under value is 49.5 with payout=2
-        self.assertFalse(simulation.roll(), "Lost roll that should have been "
-                                            "won with standard payout (2)")
+        self.assertFalse(simulation.roll(), "Lost roll that should have been"
+                                            " won with standard payout (2)")
 
     def test_win_high_payout(self):
         from primedice_sim import Configuration, Simulation
@@ -42,8 +42,8 @@ class TestRoll(TestCase):
                                 random_seed=20)
         # First roll with random_seed(20) is 24.77
         # Roll under value is 33.00 with payout=3
-        self.assertTrue(simulation.roll(), "Lost roll that should have been "
-                                           "won with high payout (3)")
+        self.assertTrue(simulation.roll(), "Lost roll that should have been"
+                                           " won with high payout (3)")
 
     def test_lose_high_payout(self):
         from primedice_sim import Configuration, Simulation
@@ -53,8 +53,8 @@ class TestRoll(TestCase):
                                 random_seed=5)
         # First roll with random_seed(5) is 41.85
         # Roll under value is 33.00 with payout=3
-        self.assertFalse(simulation.roll(), "Won roll that should have been "
-                                            "lost with high payout (3)")
+        self.assertFalse(simulation.roll(), "Won roll that should have been"
+                                            " lost with high payout (3)")
 
     def test_win_low_payout(self):
         from primedice_sim import Configuration, Simulation
@@ -75,8 +75,8 @@ class TestRoll(TestCase):
                                 random_seed=12)
         # First roll with random_seed(12) is 77.75
         # Roll under value is 66.00 with payout=1.5
-        self.assertFalse(simulation.roll(), "Won roll that should have been "
-                                            "lost with low_payout (1.5)")
+        self.assertFalse(simulation.roll(), "Won roll that should have been"
+                                            " lost with low_payout (1.5)")
 
     def test_multiple_rolls(self):
         from primedice_sim import Simulation, Configuration
@@ -98,7 +98,7 @@ class TestRoll(TestCase):
         self.assertFalse(simulation.roll(), "Failed fourth roll of multiple"
                                             " rolls")
         self.assertFalse(simulation.roll(), "Failed fifth roll if multiple"
-                                            "rolls")
+                                            " rolls")
 
 
 class TestIncreaseBet(TestCase):
@@ -192,7 +192,7 @@ class TestLoseRoll(TestCase):
         simulation.lose_roll()
         self.assertEqual(simulation.current_bet, 8,
                          "Bet was not correctly increased after single loss"
-                         "with 100% loss increase")
+                         " with 100% loss increase")
 
     def test_multiple_loose_roll(self):
         from primedice_sim import Configuration, Simulation
@@ -211,7 +211,7 @@ class TestLoseRoll(TestCase):
         simulation.lose_roll()
         self.assertEqual(simulation.current_bet, 6,
                          "Bet was not correctly increased after single loss"
-                         "with 50% loss increase")
+                         " with 50% loss increase")
 
     def test_lose_0_adder(self):
         from primedice_sim import Configuration, Simulation
@@ -220,7 +220,7 @@ class TestLoseRoll(TestCase):
         simulation.lose_roll()
         self.assertEqual(simulation.current_bet, 10,
                          "Bet did not remain constant after loss when"
-                         "loss_adder was 0")
+                         " loss_adder was 0")
 
     def test_balance_not_changed(self):
         from primedice_sim import Configuration, Simulation, Account
@@ -263,7 +263,7 @@ class TestWinRoll(TestCase):
         simulation.win_roll(simulation.account)
         self.assertEqual(simulation.account.get_balance(), 105,
                          "Balance not properly increased with a payout of"
-                         "1.5X")
+                         " 1.5X")
 
 
 class TestSingleSim(TestCase):
@@ -271,7 +271,7 @@ class TestSingleSim(TestCase):
     collected and returned.
     """
 
-    def test_single_sim_base_1(self):
+    def test_base_bet_1(self):
         from primedice_sim import Configuration, Account, Simulation
 
         config = Configuration(base_bet=1, payout=2, iterations=1,
@@ -286,7 +286,7 @@ class TestSingleSim(TestCase):
                           13, 11, 7], "Incorrect sequence of balances in "
                                       "single simulation, base_bet=1")
 
-    def test_single_sim_base_2(self):
+    def test_base_bet_2(self):
         from primedice_sim import Configuration, Account, Simulation
 
         config = Configuration(base_bet=2, payout=2, iterations=1,
@@ -297,7 +297,7 @@ class TestSingleSim(TestCase):
 
         self.assertEqual(sim_result.get_balances(), [10, 8, 12, 10, 6],
                          "Incorrect sequence of balances in single simulation,"
-                         "base_bet=2")
+                         " base_bet=2")
 
 
 class TestVerifyProgressChecks(TestCase):
@@ -307,47 +307,44 @@ class TestVerifyProgressChecks(TestCase):
         from primedice_sim import Account, Configuration
 
         self.account = Account(balance=100)
-        self.config = config = Configuration(base_bet=10, payout=2, iterations=200)
+        self.config = Configuration(base_bet=10, payout=2, iterations=200)
 
     def test_less_than_iterations(self):
         from primedice_sim import Simulation
 
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks is less than the number of iterations
-        self.assertEqual(simulation.verify_progress_checks(progress_checks=
-                                                           100),
-                         100, "Changed progress check value that was less"
-                              "than the number of iterations")
+        self.assertEqual(simulation.verify_progress_checks(
+            progress_checks=100), 100, "Changed progress check value that was"
+                                       " less than the number of iterations")
 
     def test_greater_than_iterations(self):
         from primedice_sim import Simulation
 
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks is greater than the number of iterations
-        self.assertEqual(simulation.verify_progress_checks(progress_checks=
-                                                           300),
-                         200, "Progress check value was not set as the "
-                              "iterations value when a number greater than"
-                              " the iterations was entered")
+        self.assertEqual(simulation.verify_progress_checks(
+            progress_checks=300), 200, "Progress check value was not set as"
+                                       " the iterations value when a number"
+                                       " greater than the iterations was"
+                                       " entered")
 
     def test_negative_checks(self):
         from primedice_sim import Simulation
 
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks value is negative
-        self.assertEqual(simulation.verify_progress_checks(progress_checks=
-                                                           (-100)),
-                         200, "Progress check value was not set as the "
-                              "iterations value when a negative number was"
-                              " entered")
+        self.assertEqual(simulation.verify_progress_checks(
+            progress_checks=(-100)), 200, "Progress check value was not set as"
+                                          " the iterations value when a"
+                                          " negative number was entered")
 
     def test_equal_checks(self):
         from primedice_sim import Simulation
 
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks value is equal to iterations value
-        self.assertEqual(simulation.verify_progress_checks(progress_checks=
-                                                           200),
-                         200, "Progress check value was changed when the"
-                              "iterations value was the same as the progress"
-                              "checks value.")
+        self.assertEqual(simulation.verify_progress_checks(
+            progress_checks=200), 200, "Progress check value was changed when"
+                                        " the iterations value was the same as"
+                                        " the progress checks value.")
