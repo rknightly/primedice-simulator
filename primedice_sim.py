@@ -179,6 +179,8 @@ class Gui:
         # print("Zipped enumerated meaningful medians:",
         #       list(zip(*enumerate(results.get_meaningful_medians()))))
 
+        print("[Progress] Graphing results...")
+
         median_x_values, median_y_values = \
             zip(*enumerate(self.sim_results.get_median_balances()))
         median_graph = self.graph_fig.add_subplot(2, 1, 1)
@@ -390,6 +392,9 @@ class AverageResults:
     def find_average_balances(self):
         """Find the average balances from the list of results"""
 
+        print("[Progress] Calculating average balances...")
+        start_time = time.time()
+
         # Produce a lists of lists that are all of the same length by adding
         # zeros to the end of any list that is too short.
         # Then, add the corresponding values of each list together to produce
@@ -404,11 +409,17 @@ class AverageResults:
         num_of_balances = len(self.total_balances_list)
         average_list = [total_balance // num_of_balances for
                         total_balance in sum_list]
+        print("[Progress] Average balances calculated")
+        time_taken = str((time.time() - start_time))[:5]
+        print("[Time] Time taken: --- %s seconds ---" % time_taken, "\n")
 
         return average_list
 
     def find_median_balances(self):
         """Find the median balances from the list of results"""
+
+        print("[Progress] Calculating median balances...")
+        start_time = time.time()
 
         equal_length_total_balances = itertools.zip_longest(
             *self.total_balances_list, fillvalue=0)
@@ -421,6 +432,9 @@ class AverageResults:
             # Stop calculating medians once they reach 0
             if median == 0:
                 break
+        print("[Progress] Median balances calculated")
+        time_taken = str((time.time() - start_time))[:5]
+        print("[Time] Time taken: --- %s seconds ---" % time_taken, "\n")
 
         return median_balances
 
@@ -581,7 +595,7 @@ class Simulation:
         print("Base bet:", self.config.get_base_bet())
         print("Payout:", self.config.get_payout())
         print("Iterations:", self.config.get_iterations())
-        print("Loss adder:", self.config.get_loss_adder())
+        print("Loss adder:", self.config.get_loss_adder(), "\n")
 
     def run(self, progress_bar, screen, progress_checks=50):
         """Run several simulations and return the average of them all"""
@@ -592,6 +606,9 @@ class Simulation:
         # the progress bar and refresh the screen when necessary
 
         self.print_settings()
+
+        print("[Progress] Running simulations...\n")
+        start_time = time.time()
 
         # Keep a running total of rolls from all simulations to calculate
         # overall average.
@@ -613,6 +630,9 @@ class Simulation:
 
         sim_result = AverageResults(each_sim_result)
         sim_result.print_results()
+
+        time_taken = str((time.time() - start_time))[:5]
+        print("[Time] Time taken: --- %s seconds ---" % time_taken, "\n")
 
         return sim_result
 
@@ -648,7 +668,8 @@ def main():
     program = Program()
     program.run()
 
-    print("\nTime taken: --- %s seconds ---" % (time.time() - start_time))
+    time_taken = str((time.time() - start_time))[:5]
+    print("\n[Time] Total run time: --- %s seconds ---" % time_taken)
 
 if __name__ == "__main__":
     main()
