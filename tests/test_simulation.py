@@ -298,3 +298,56 @@ class TestSingleSim(TestCase):
         self.assertEqual(sim_result.get_balances(), [10, 8, 12, 10, 6],
                          "Incorrect sequence of balances in single simulation,"
                          "base_bet=2")
+
+
+class TestVerifyProgressChecks(TestCase):
+    """Ensure that the progress_checks amount is appropriately verified"""
+
+    def setUp(self):
+        from primedice_sim import Account, Configuration
+
+        self.account = Account(balance=100)
+        self.config = config = Configuration(base_bet=10, payout=2, iterations=200)
+
+    def test_less_than_iterations(self):
+        from primedice_sim import Simulation
+
+        simulation = Simulation(config=self.config, account=self.account)
+        # Progress checks is less than the number of iterations
+        self.assertEqual(simulation.verify_progress_checks(progress_checks=
+                                                           100),
+                         100, "Changed progress check value that was less"
+                              "than the number of iterations")
+
+    def test_greater_than_iterations(self):
+        from primedice_sim import Simulation
+
+        simulation = Simulation(config=self.config, account=self.account)
+        # Progress checks is greater than the number of iterations
+        self.assertEqual(simulation.verify_progress_checks(progress_checks=
+                                                           300),
+                         200, "Progress check value was not set as the "
+                              "iterations value when a number greater than"
+                              " the iterations was entered")
+
+    def test_negative_checks(self):
+        from primedice_sim import Simulation
+
+        simulation = Simulation(config=self.config, account=self.account)
+        # Progress checks value is negative
+        self.assertEqual(simulation.verify_progress_checks(progress_checks=
+                                                           (-100)),
+                         200, "Progress check value was not set as the "
+                              "iterations value when a negative number was"
+                              " entered")
+
+    def test_equal_checks(self):
+        from primedice_sim import Simulation
+
+        simulation = Simulation(config=self.config, account=self.account)
+        # Progress checks value is equal to iterations value
+        self.assertEqual(simulation.verify_progress_checks(progress_checks=
+                                                           200),
+                         200, "Progress check value was changed when the"
+                              "iterations value was the same as the progress"
+                              "checks value.")

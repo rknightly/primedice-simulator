@@ -508,11 +508,13 @@ class Simulation:
         self.current_bet = self.config.get_base_bet()
 
     def lose_roll(self):
-        """Simulate a lost roll"""
+        """Simulate a lost roll by increasing the bet by the specified amount
+        """
+
         self.increase_bet()
 
     def win_roll(self, account):
-        """Simulate a won roll"""
+        """Simulate a won roll by increasing the balance"""
 
         reward = self.current_bet * self.config.get_payout()
         account.add(reward)
@@ -568,7 +570,8 @@ class Simulation:
         # The number of progress checks must be less than the number of
         # iterations in order for the progress bar to work properly.
 
-        if progress_checks > self.config.get_iterations():
+        if progress_checks > self.config.get_iterations() or \
+                progress_checks <= 0:   # The value should also not be negative
             # If this case does arise, set the progress checks to be the same
             # as the number of iterations, simplifying calculations
             progress_checks = self.config.get_iterations()
