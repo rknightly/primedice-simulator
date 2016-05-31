@@ -1,5 +1,8 @@
 # primedice-simulator
-A simulation to test different PrimeDice auto-bet settings. 
+A simulation to test different PrimeDice auto-bet settings.  The 
+simulator outputs results in the form of graphs such as the one below.
+
+![Sample Graph](/docs/primedice_example_graph.png)
   
 ***Dependencies:***
 
