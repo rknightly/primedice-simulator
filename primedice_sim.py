@@ -370,7 +370,7 @@ class AverageResults:
         total = 0
         for result in self.results_list:
             total += result.get_average_balance()
-        average = total / self.number_of_results
+        average = total // self.number_of_results
 
         return average
 
@@ -383,7 +383,7 @@ class AverageResults:
         # Average each individual result and find the average of those values
         for result in self.results_list:
             total += result.get_rolls_until_bankrupt()
-        average = total / self.number_of_results
+        average = total // self.number_of_results
 
         return average
 
@@ -416,7 +416,7 @@ class AverageResults:
         grouped_balances = zip(equal_length_total_balances)
         median_balances = []
         for balances in grouped_balances:
-            median = np.median(balances)
+            median = int(np.median(balances))
             median_balances.append(median)
             # Stop calculating medians once they reach 0
             if median == 0:
@@ -429,9 +429,6 @@ class AverageResults:
 
     def get_median_balances(self):
         return self.median_balances
-
-    def get_num_of_rolls(self):
-        return self.num_of_rolls
 
     def print_results(self):
         """Print out the results saved with explaining labels"""
