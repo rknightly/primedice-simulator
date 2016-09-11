@@ -1,4 +1,7 @@
 from unittest import TestCase
+from primediceSim.simulation import Simulation
+from primediceSim.configuration import Configuration
+from primediceSim.account import Account
 
 
 class TestRoll(TestCase):
@@ -7,14 +10,10 @@ class TestRoll(TestCase):
     """
 
     def setUp(self):
-        from primedice_sim import Account
-
         # Account is not relevant to rolls, but still necessary for setup
         self.account = Account(balance=100)
 
     def test_win(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=2)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=20)
@@ -24,8 +23,6 @@ class TestRoll(TestCase):
                                            " won with standard payout (2)")
 
     def test_lose(self):
-        from primedice_sim import Simulation, Configuration
-
         config = Configuration(base_bet=1, payout=2)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=12)
@@ -35,8 +32,6 @@ class TestRoll(TestCase):
                                             " won with standard payout (2)")
 
     def test_win_high_payout(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=3)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=20)
@@ -46,8 +41,6 @@ class TestRoll(TestCase):
                                            " won with high payout (3)")
 
     def test_lose_high_payout(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=3)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=5)
@@ -57,8 +50,6 @@ class TestRoll(TestCase):
                                             " lost with high payout (3)")
 
     def test_win_low_payout(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=1.5)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=5)
@@ -68,8 +59,6 @@ class TestRoll(TestCase):
                                          " with low payout (1.5)")
 
     def test_lose_low_payout(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=1.5)
         simulation = Simulation(config=config, account=self.account,
                                 random_seed=12)
@@ -79,8 +68,6 @@ class TestRoll(TestCase):
                                             " lost with low_payout (1.5)")
 
     def test_multiple_rolls(self):
-        from primedice_sim import Simulation, Configuration
-
         config = Configuration(base_bet=1, payout=2)
 
         simulation = Simulation(config=config, account=self.account,
@@ -107,14 +94,10 @@ class TestIncreaseBet(TestCase):
     """
 
     def setUp(self):
-        from primedice_sim import Account
-
         # Account is not relevant to the test, but still necessary for setup
         self.account = Account(balance=50)
 
     def test_increase_integer(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=4, payout=2, loss_adder=100)
         simulation = Simulation(config=config, account=self.account)
 
@@ -123,7 +106,6 @@ class TestIncreaseBet(TestCase):
                          "Current bet was not increased properly in Test 1")
 
     def test_increase_float(self):
-        from primedice_sim import Configuration, Simulation
         config = Configuration(base_bet=1, payout=3, loss_adder=50)
         simulation = Simulation(config=config, account=self.account)
         simulation.increase_bet()
@@ -137,12 +119,9 @@ class TestResetBet(TestCase):
     """
 
     def setUp(self):
-        from primedice_sim import Account
         self.account = Account(balance=100)
 
     def test_reset_single_roll(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=7, payout=2, loss_adder=200)
         simulation = Simulation(config=config, account=self.account)
         simulation.increase_bet()
@@ -153,8 +132,6 @@ class TestResetBet(TestCase):
                          " single time")
 
     def test_reset_multiple_rolls(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=10, payout=2, loss_adder=200)
         simulation = Simulation(config=config, account=self.account)
         for _ in range(6):
@@ -166,8 +143,6 @@ class TestResetBet(TestCase):
                          " multiple times")
 
     def test_reset_without_rolling(self):
-        from primedice_sim import Configuration, Simulation
-
         config = Configuration(base_bet=1, payout=5, loss_adder=100)
         simulation = Simulation(config=config, account=self.account)
         # No increases or decreases made
@@ -182,11 +157,9 @@ class TestLoseRoll(TestCase):
     """Assure that the bet is appropriately increased after a roll is lost"""
 
     def setUp(self):
-        from primedice_sim import Account
         self.account = Account(balance=100)
 
     def test_single_lose_roll(self):
-        from primedice_sim import Configuration, Simulation
         config = Configuration(base_bet=4, payout=2, loss_adder=100)
         simulation = Simulation(config=config, account=self.account)
         simulation.lose_roll()
@@ -195,7 +168,6 @@ class TestLoseRoll(TestCase):
                          " with 100% loss increase")
 
     def test_multiple_loose_roll(self):
-        from primedice_sim import Configuration, Simulation
         config = Configuration(base_bet=4, payout=2, loss_adder=100)
         simulation = Simulation(config=config, account=self.account)
         for _ in range(4):
@@ -205,7 +177,6 @@ class TestLoseRoll(TestCase):
                          " losses with 100% loss increase")
 
     def test_frac_adder(self):
-        from primedice_sim import Configuration, Simulation
         config = Configuration(base_bet=4, payout=2, loss_adder=50)
         simulation = Simulation(config=config, account=self.account)
         simulation.lose_roll()
@@ -214,7 +185,6 @@ class TestLoseRoll(TestCase):
                          " with 50% loss increase")
 
     def test_lose_0_adder(self):
-        from primedice_sim import Configuration, Simulation
         config = Configuration(base_bet=10, payout=2, loss_adder=0)
         simulation = Simulation(config=config, account=self.account)
         simulation.lose_roll()
@@ -223,7 +193,6 @@ class TestLoseRoll(TestCase):
                          " loss_adder was 0")
 
     def test_balance_not_changed(self):
-        from primedice_sim import Configuration, Simulation, Account
         account = Account(balance=100)
         config = Configuration(base_bet=10, payout=2, loss_adder=0)
         simulation = Simulation(config=config, account=account)
@@ -240,8 +209,6 @@ class TestWinRoll(TestCase):
     """Ensure that the balance is appropriately increased when a roll is won"""
 
     def test_integer_payout(self):
-        from primedice_sim import Configuration, Account, Simulation
-
         config = Configuration(base_bet=10, payout=2, loss_adder=100)
         account = Account(balance=100)
         simulation = Simulation(config=config, account=account)
@@ -253,8 +220,6 @@ class TestWinRoll(TestCase):
                          " 2X")
 
     def test_frac_payout(self):
-        from primedice_sim import Configuration, Account, Simulation
-
         config = Configuration(base_bet=10, payout=1.5, loss_adder=50)
         account = Account(balance=100)
         simulation = Simulation(config=config, account=account)
@@ -272,8 +237,6 @@ class TestSingleSim(TestCase):
     """
 
     def test_base_bet_1(self):
-        from primedice_sim import Configuration, Account, Simulation
-
         config = Configuration(base_bet=1, payout=2, iterations=1,
                                loss_adder=100)
         account = Account(balance=5)
@@ -287,8 +250,6 @@ class TestSingleSim(TestCase):
                                       "single simulation, base_bet=1")
 
     def test_base_bet_2(self):
-        from primedice_sim import Configuration, Account, Simulation
-
         config = Configuration(base_bet=2, payout=2, iterations=1,
                                loss_adder=100)
         account = Account(balance=10)
@@ -304,14 +265,10 @@ class TestVerifyProgressChecks(TestCase):
     """Ensure that the progress_checks amount is appropriately verified"""
 
     def setUp(self):
-        from primedice_sim import Account, Configuration
-
         self.account = Account(balance=100)
         self.config = Configuration(base_bet=10, payout=2, iterations=200)
 
     def test_less_than_iterations(self):
-        from primedice_sim import Simulation
-
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks is less than the number of iterations
         self.assertEqual(simulation.verify_progress_checks(
@@ -319,8 +276,6 @@ class TestVerifyProgressChecks(TestCase):
                                        " less than the number of iterations")
 
     def test_greater_than_iterations(self):
-        from primedice_sim import Simulation
-
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks is greater than the number of iterations
         self.assertEqual(simulation.verify_progress_checks(
@@ -330,8 +285,6 @@ class TestVerifyProgressChecks(TestCase):
                                        " entered")
 
     def test_negative_checks(self):
-        from primedice_sim import Simulation
-
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks value is negative
         self.assertEqual(simulation.verify_progress_checks(
@@ -340,8 +293,6 @@ class TestVerifyProgressChecks(TestCase):
                                           " negative number was entered")
 
     def test_equal_checks(self):
-        from primedice_sim import Simulation
-
         simulation = Simulation(config=self.config, account=self.account)
         # Progress checks value is equal to iterations value
         self.assertEqual(simulation.verify_progress_checks(

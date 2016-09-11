@@ -1,10 +1,11 @@
 from unittest import TestCase
+from primediceSim.account import Account
+
 
 class TestAdd(TestCase):
     """Ensure that the balance is appropriately added to"""
 
     def test_positive(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.add(5)
         self.assertEqual(account.get_balance(), 25,
@@ -12,7 +13,6 @@ class TestAdd(TestCase):
                          "positive integer of 5 was added")
 
     def test_negative(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.add(-5)
         self.assertEqual(account.get_balance(), 15,
@@ -20,7 +20,6 @@ class TestAdd(TestCase):
                          "negative integer of -5 was added")
 
     def test_zero(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.add(0)
         self.assertEqual(account.get_balance(), 20,
@@ -28,7 +27,6 @@ class TestAdd(TestCase):
                          " added")
 
     def test_float(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.add(5.5)
         self.assertEqual(account.get_balance(), 25,
@@ -40,7 +38,6 @@ class TestSubtract(TestCase):
     """Ensure that the balance is appropriately subtracted from"""
 
     def test_positive(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.subtract(5)
         self.assertEqual(account.get_balance(), 15,
@@ -48,7 +45,6 @@ class TestSubtract(TestCase):
                          " when a positive integer of 5 was subtracted")
 
     def test_negative(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.subtract(-5)
         self.assertEqual(account.get_balance(), 25,
@@ -56,7 +52,6 @@ class TestSubtract(TestCase):
                          " to when a negative integer of -5 was subtracted")
 
     def test_zero(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.subtract(0)
         self.assertEqual(account.get_balance(), 20,
@@ -64,7 +59,6 @@ class TestSubtract(TestCase):
                          " subtracted")
 
     def test_float(self):
-        from primedice_sim import Account
         account = Account(balance=20)
         account.subtract(5.5)
         self.assertEqual(account.get_balance(), 15,

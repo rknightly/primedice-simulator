@@ -1,12 +1,11 @@
 from unittest import TestCase
+from primediceSim.simulation import Results, AverageResults
 
 
 class TestFindAverageBal(TestCase):
     """Ensure that the average balances are appropriately calculated"""
 
     def test_single_result(self):
-        from primedice_sim import Results, AverageResults
-
         sample_result = Results([5, 6, 7, 5, 7])
         average_result = AverageResults([sample_result])
         self.assertEqual(average_result.overall_average_balance, 6,
@@ -14,7 +13,6 @@ class TestFindAverageBal(TestCase):
                          " result")
 
     def test_multiple_results(self):
-        from primedice_sim import Results, AverageResults
 
         sample_results = [Results([5, 6, 7, 9, -2]),
                           Results([2, 6, 8, 8]),
@@ -25,8 +23,6 @@ class TestFindAverageBal(TestCase):
                          " multiple results")
 
     def test_float_results(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([3, 5, 4, 1, 7]),
                           Results([5, 5, 10, 1])]
 
@@ -42,8 +38,6 @@ class TestFindAverageRollsUntilBankrupt(TestCase):
     """
 
     def test_single_result(self):
-        from primedice_sim import Results, AverageResults
-
         sample_result = Results([5, 6, 7, 5, 7])
         average_result = AverageResults([sample_result])
         self.assertEqual(average_result.find_average_rolls_until_bankrupt(), 4,
@@ -51,8 +45,6 @@ class TestFindAverageRollsUntilBankrupt(TestCase):
                          " calculated over one result with positive integers")
 
     def test_multiple_results(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([5, 6, 7, 9, -2]),
                           Results([2, 6, 8, 8]),
                           Results([0, 7, 14])]
@@ -62,8 +54,6 @@ class TestFindAverageRollsUntilBankrupt(TestCase):
                          " calculated over multiple results")
 
     def test_float_average(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([3, 5, 4, 1, 7]),
                           Results([5, 5, 10, 1])]
 
@@ -78,8 +68,6 @@ class TestFindAverageBalances(TestCase):
     """Ensure that the sequence of average balances is properly found"""
 
     def test_single_result(self):
-        from primedice_sim import Results, AverageResults
-
         sample_result = Results([5, 6, 7, 5, 7])
         average_result = AverageResults([sample_result])
         self.assertEqual(average_result.get_average_balances(),
@@ -88,8 +76,6 @@ class TestFindAverageBalances(TestCase):
                          "one result with integers")
 
     def test_multiple_results(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([5, 8, 10, 9, 12]),
                           Results([4, 6, 5, 12]),
                           Results([0, 7, 15])]
@@ -100,8 +86,6 @@ class TestFindAverageBalances(TestCase):
                          "multiple results with integers")
 
     def test_float_average(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([3, 5, 4,  1, 7]),
                           Results([4, 5, 10, 1])]
 
@@ -116,8 +100,6 @@ class TestFindMedianBalances(TestCase):
     """Ensure that the median balances are correctly calculated"""
 
     def test_single_result(self):
-        from primedice_sim import Results, AverageResults
-
         sample_result = Results([5, 6, 7, 5, 7])
         average_result = AverageResults([sample_result])
         self.assertEqual(average_result.get_median_balances(),
@@ -126,8 +108,6 @@ class TestFindMedianBalances(TestCase):
                          "one result with integers")
 
     def test_multiple_results(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([5, 8, 10,  9, 12]),
                           Results([4, 6,  5, 12]),
                           Results([0, 7, 15])]
@@ -138,8 +118,6 @@ class TestFindMedianBalances(TestCase):
                          "multiple results with integers")
 
     def test_float_median(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([3, 5,  4, 1, 7]),
                           Results([4, 5, 10, 1])]
 
@@ -150,8 +128,6 @@ class TestFindMedianBalances(TestCase):
                          " multiple results with float average values")
 
     def test_zeroes(self):
-        from primedice_sim import Results, AverageResults
-
         sample_results = [Results([5, 8, 10, 9, 12, 14, 16, 14, 13, 10, 6]),
                           Results([4, 6, 5, 12]),
                           Results([0, 7, 15])]
