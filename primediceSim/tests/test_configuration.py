@@ -1,6 +1,7 @@
 from unittest import TestCase
 from primediceSim.configuration import Configuration
 
+
 class TestCalcRollUnderValue(TestCase):
     """Make sure that the roll_under_value is appropriately calculated"""
 
