@@ -2,10 +2,10 @@
 
 import time
 
-from primediceSim.gui import Gui
-from primediceSim.configuration import Configuration
-from primediceSim.account import Account
-from primediceSim.simulation import Simulation
+from gui import Gui
+from configuration import Configuration
+from account import Account
+from simulation import Simulation
 
 
 class Program:
